@@ -35,7 +35,7 @@ class images(commands.Cog):
         await interaction.followup.send(
             f"The probability of you shipping with {target} is **{random_number}%**")
 
-    @commands.command()  # wanted command
+    @app_commands.command(name="wanted", description="Shows your wanted picture")  # wanted command
     @commands.cooldown(1, 5, commands.BucketType.user)
     @app_commands.describe(member="The user you wish to be wanted")
     async def wanted(self, interaction: discord.Interaction, member: discord.Member = None):
@@ -43,182 +43,190 @@ class images(commands.Cog):
             member = interaction.user
 
         want = Image.open("media/wanted.jpg")
-        asset = member.avatar_url_as(size=128)
+        asset = member.avatar
         data = BytesIO(await asset.read())
         pfp = Image.open(data)
         pfp = pfp.resize((255, 256))
         want.paste(pfp, (97, 200))
         want.save("media/want.jpg")
 
-        await ctx.send(file=discord.File("media/want.jpg"))
+        await interaction.response.send_message(file=discord.File("media/want.jpg"))
 
-    @commands.command(aliases=["death", "die"])  # rip command
+    @app_commands.command(name="rip", description="Show your tombstone")  # rip command
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def rip(self, ctx, member: discord.Member = None):
+    @app_commands.describe(member="The user you wish to see dead")
+    async def rip(self, interaction: discord.Interaction, member: discord.Member = None):
         if member is None:
-            member = ctx.author
+            member = interaction.user
 
         ded = Image.open("media/rip.png")
-        asset = member.avatar_url_as(size=128)
+        asset = member.avatar
         data = BytesIO(await asset.read())
         pfp = Image.open(data)
         pfp = pfp.resize((125, 125))
         ded.paste(pfp, (88, 150))
         ded.save("media/ded.png")
 
-        await ctx.send(file=discord.File("media/ded.png"))
+        await interaction.response.send_message(file=discord.File("media/ded.png"))
 
-    @commands.command(aliases=["hit"])  # punch command
+    @app_commands.command(name="punch", description="Sometimes we all want to punch someone in the face")  # punch command
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def punch(self, ctx, target: discord.Member):
+    @app_commands.describe(target="The user you wish to punch")
+    async def punch(self, interaction: discord.Interaction, target: discord.Member):
 
         hit = Image.open("media/punch.jpg")
-        asset1 = ctx.author.avatar_url_as(size=128)
+        asset1 = interaction.user.avatar
         data = BytesIO(await asset1.read())
         pfp1 = Image.open(data)
         pfp1 = pfp1.resize((80, 80))
         hit.paste(pfp1, (40, 220))
 
-        asset2 = target.avatar_url_as(size=128)
+        asset2 = target.avatar
         data = BytesIO(await asset2.read())
         pfp2 = Image.open(data)
         pfp2 = pfp2.resize((80, 80))
         hit.paste(pfp2, (160, 50))
 
-        asset3 = target.avatar_url_as(size=128)
+        asset3 = target.avatar
         data = BytesIO(await asset3.read())
         pfp3 = Image.open(data)
         pfp3 = pfp3.resize((80, 80))
         hit.paste(pfp3, (430, 340))
         hit.save("media/hit.jpg")
 
-        await ctx.send(file=discord.File("media/hit.jpg"))
+        await interaction.response.send_message(file=discord.File("media/hit.jpg"))
 
-    @commands.command()  # slap command
+    @app_commands.command(name="slap", description="Slap someone who you think deserves it!")  # slap command
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def slap(self, ctx, target: discord.Member):
+    @app_commands.describe(target="The user you wish to slap")
+    async def slap(self, interaction: discord.Interaction, target: discord.Member):
 
         slaps = Image.open("media/slap.jpg")
-        asset1 = ctx.author.avatar_url_as(size=128)
+        asset1 = interaction.user.avatar
         data = BytesIO(await asset1.read())
         pfp1 = Image.open(data)
         pfp1 = pfp1.resize((80, 80))
         slaps.paste(pfp1, (219, 87))
 
-        asset2 = target.avatar_url_as(size=128)
+        asset2 = target.avatar
         data = BytesIO(await asset2.read())
         pfp2 = Image.open(data)
         pfp2 = pfp2.resize((80, 80))
         slaps.paste(pfp2, (495, 120))
         slaps.save("media/slapped.jpg")
 
-        await ctx.send(file=discord.File("media/slapped.jpg"))
+        await interaction.response.send_message(file=discord.File("media/slapped.jpg"))
 
-    @commands.command()  # hug command
+    @app_commands.command(name="hug", description="hug someone who needs it <3")  # hug command
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def hug(self, ctx, target: discord.Member):
+    @app_commands.describe(target="The user you wish to hug")
+    async def hug(self, interaction: discord.Interaction, target: discord.Member):
 
         hugs = Image.open("media/hug.jpg")
-        asset1 = ctx.author.avatar_url_as(size=128)
+        asset1 = interaction.user.avatar
         data = BytesIO(await asset1.read())
         pfp1 = Image.open(data)
         pfp1 = pfp1.resize((70, 70))
         hugs.paste(pfp1, (60, 75))
 
-        asset2 = target.avatar_url_as(size=128)
+        asset2 = target.avatar
         data = BytesIO(await asset2.read())
         pfp2 = Image.open(data)
         pfp2 = pfp2.resize((70, 70))
         hugs.paste(pfp2, (150, 65))
         hugs.save("media/hugged.jpg")
 
-        await ctx.send(file=discord.File("media/hugged.jpg"))
+        await interaction.response.send_message(file=discord.File("media/hugged.jpg"))
 
-    @commands.command(aliases=['mad'])  # angry command
+    @app_commands.command(name="angry", description="Don't we all rage at some point?")  # angry command
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def angry(self, ctx, member: discord.Member = None):
+    @app_commands.describe(member="The user you wish to see angry")
+    async def angry(self, interaction: discord.Interaction, member: discord.Member = None):
         if member is None:
-            member = ctx.author
+            member = interaction.user
 
         hugs = Image.open("media/angry.jpg")
-        asset1 = member.avatar_url_as(size=128)
+        asset1 = member.avatar
         data = BytesIO(await asset1.read())
         pfp1 = Image.open(data)
         pfp1 = pfp1.resize((540, 540))
         hugs.paste(pfp1, (820, 20))
 
-        asset2 = member.avatar_url_as(size=128)
+        asset2 = member.avatar
         data = BytesIO(await asset2.read())
         pfp2 = Image.open(data)
         pfp2 = pfp2.resize((450, 450))
         hugs.paste(pfp2, (840, 965))
         hugs.save("media/mad.jpg")
 
-        await ctx.send(file=discord.File("media/mad.jpg"))
+        await interaction.response.send_message(file=discord.File("media/mad.jpg"))
 
-    @commands.command(aliases=["devil"])  # evil command
+    @app_commands.command(name="evil", description="Wonder what it's like to be evil?")  # evil command
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def evil(self, ctx, member: discord.Member = None):
+    @app_commands.describe(member="The user you wish to see evil")
+    async def evil(self, interaction: discord.Interaction, member: discord.Member = None):
         if member is None:
-            member = ctx.author
+            member = interaction.user
 
         want = Image.open("media/evil.jpg")
-        asset = member.avatar_url_as(size=128)
+        asset = member.avatar
         data = BytesIO(await asset.read())
         pfp = Image.open(data)
         pfp = pfp.resize((120, 120))
         want.paste(pfp, (163, 72))
         want.save("media/devil.jpg")
 
-        await ctx.send(file=discord.File("media/devil.jpg"))
+        await interaction.response.send_message(file=discord.File("media/devil.jpg"))
 
-    @commands.command()  # shoot command
+    @app_commands.command(name="shoot", description="No! don't shoot!")  # shoot command
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def shoot(self, ctx, target: discord.Member):
+    @app_commands.describe(target="The user you wish to shoot")
+    async def shoot(self, interaction: discord.Interaction, target: discord.Member):
 
         slaps = Image.open("media/shoot.png")
-        asset1 = ctx.author.avatar_url_as(size=128)
+        asset1 = interaction.user.avatar
         data = BytesIO(await asset1.read())
         pfp1 = Image.open(data)
         pfp1 = pfp1.resize((60, 60))
         slaps.paste(pfp1, (315, 23))
 
-        asset2 = target.avatar_url_as(size=128)
+        asset2 = target.avatar
         data = BytesIO(await asset2.read())
         pfp2 = Image.open(data)
         pfp2 = pfp2.resize((40, 40))
         slaps.paste(pfp2, (80, 101))
         slaps.save("media/shot.png")
 
-        await ctx.send(file=discord.File("media/shot.png"))
+        await interaction.response.send_message(file=discord.File("media/shot.png"))
 
-    @commands.command(aliases=["threat", "blackmail"])  # threat command
+    @app_commands.command(name="blackmail", description="We can do this the easy way, or the hard way...")  # threat command
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def threaten(self, ctx, target: discord.Member):
+    @app_commands.describe(target="The user you wish to threaten")
+    async def blackmail(self, interaction: discord.Interaction, target: discord.Member):
 
         slaps = Image.open("media/threat.png")
-        asset1 = ctx.author.avatar_url_as(size=128)
+        asset1 = interaction.user.avatar
         data = BytesIO(await asset1.read())
         pfp1 = Image.open(data)
         pfp1 = pfp1.resize((150, 150))
         slaps.paste(pfp1, (505, 150))
 
-        asset2 = target.avatar_url_as(size=128)
+        asset2 = target.avatar
         data = BytesIO(await asset2.read())
         pfp2 = Image.open(data)
         pfp2 = pfp2.resize((160, 160))
         slaps.paste(pfp2, (110, 135))
         slaps.save("media/threatened.png")
 
-        await ctx.send(file=discord.File("media/threatened.png"))
+        await interaction.response.send_message(file=discord.File("media/threatened.png"))
 
-    @commands.command(aliases=['party'])  # dance command
-    async def dance(self, ctx):
+    @app_commands.command(name="dance", description="Dance party!!!")  # dance command
+    async def dance(self, interaction):
         gifs = ['https://c.tenor.com/KsE4YxgXzqcAAAAd/hungarian-top-gamers2019hungary.gif',
                 'https://cdn.discordapp.com/attachments/744639508880031775/948311371441926234/happy-pants.gif',
                 'https://cdn.discordapp.com/attachments/744639508880031775/948311928567128094/funny-dance.gif']
 
-        await ctx.send(random.choice(gifs))
+        await interaction.response.send_message(random.choice(gifs))
 
 
 async def setup(client):
