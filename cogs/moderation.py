@@ -1,101 +1,66 @@
 import discord
 from discord.ext import commands
-from discord.ext.commands import has_permissions
+from discord import app_commands
+from discord.app_commands import Choice
+
 
 
 class moderation(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-        @client.command(aliases=["delete", "del", "remove"])  # clear command
-        @has_permissions(manage_messages=True)
-        async def clear(ctx, amount=1):
-                await ctx.channel.purge(limit=int(amount)+1)
+        @client.tree.command(name="clear", description="Clear away messy chat")  # clear command
+        @app_commands.checks.has_permissions(manage_messages=True)
+        @app_commands.describe(amount="The amount of messages you wish to clear")
+        async def clear(interaction: discord.Interaction, amount: int = 1):
+            await interaction.channel.purge(limit=int(amount))
 
-        @client.command()  # kick command
-        @has_permissions(administrator=True)
-        async def kick(ctx, member: discord.Member, *, reason):
+        @client.tree.command(name="kick", description="Kick a user from your server")  # kick command
+        @app_commands.checks.has_permissions(kick_members=True)
+        @app_commands.describe(member="The user you wish to kick",
+                               reason="If you wish to provide a reason for kicking this user")
+        async def kick(interaction: discord.Interaction, member: discord.Member, reason: str = None):
             await member.kick(reason=reason)
-            await ctx.send("Get outta here")
+            await interaction.response.send_message(f"Kicked {member}")
 
-        @client.command()  # ban command
-        @has_permissions(administrator=True)
-        async def ban(ctx, member: discord.Member, *, reason):
+        @client.tree.command(name="ban", description="Ban a user from your server")  # ban command
+        @app_commands.checks.has_permissions(ban_members=True, administrator=True)
+        @app_commands.describe(member="The user you wish to ban",
+                               reason="If you wish to provide a reason for banning this user")
+        async def ban(interaction: discord.Interaction, member: discord.Member, reason: str = None):
             await member.ban(reason=reason)
-            await ctx.send("Be gone!")
+            await interaction.response.send_message(f"Banned {member}")
 
-        @client.command()  # unban command
-        @has_permissions(administrator=True)
-        async def unban(ctx, *, member):
-            banned_users = await ctx.guild.bans()
+        @client.tree.command(name="unban", description="Unban a user from your server")  # unban command
+        @app_commands.checks.has_permissions(ban_members=True, administrator=True)
+        async def unban(interaction: discord.Interaction, member: discord.Member):
+            banned_users = interaction.guild.bans()
             member_name, member_discriminator = member.split('#')
 
             for ban_entry in banned_users:
                 user = ban_entry.user
 
                 if (user.name, user.discriminator) == (member_name, member_discriminator):
-                    await ctx.guild.unban(user)
-                    await ctx.send(f"Unbanned {user.mention}")
+                    await interaction.guild.unban(user)
+                    await interaction.response.send_message(f"Unbanned {user.mention}")
                     return
 
-        @client.command(aliases=["silence"])  # mute command
-        @has_permissions(administrator=True)
-        async def mute(ctx, member: discord.Member, *, reason):
-            guild = ctx.guild
-            role = discord.utils.get(ctx.guild.roles, name="Muted")
 
-            if not role:
-                role = await guild.create_role(name="Muted")
-
-                for channel in guild.channels:
-                    await channel.set_permissions(role, speak=False, send_messages=False)
-
-            await member.add_roles(role, reason=reason)
-            embed = discord.Embed(
-                color=discord.Color.orange()
-            )
-            embed.add_field(name=f"Muted {member}",
-                            value=f"Reason: {reason}",
-                            inline=False)
-
-            await ctx.send(embed=embed)
-
-        @client.command()  # unmute command
-        @has_permissions(administrator=True)
-        async def unmute(ctx, member: discord.Member):
-            role = discord.utils.get(ctx.guild.roles, name="Muted")
-
-            await member.remove_roles(role)
-            embed = discord.Embed(
-                color=discord.Color.orange()
-            )
-            embed.add_field(name=f"Unmuted {member}",
-                            value="Try not to cause trouble again",
-                            inline=False)
-
-            await ctx.send(embed=embed)
-
-        @client.command(aliases=["ar", "giverole", "gr"])  # add role
-        @has_permissions(administrator=True)
-        async def addrole(ctx, role: discord.Role = None, member: discord.Member = None):
-            if role is None:
-                return await ctx.send("Please mention a role!")
-            elif member is None:
-                await ctx.send("Please mention someone!")
-                return
+        @client.tree.command(name="addrole", description="Assign a role to a user")  # add role
+        @app_commands.checks.has_permissions(manage_roles=True)
+        @app_commands.describe(role="The role you wish to add",
+                               member="The user you wish to give the role to")
+        async def addrole(interaction: discord.Interaction, role: discord.Role, member: discord.Member):
             await member.add_roles(role)
-            await ctx.send(f"*Added the {role} role to {member}*")
+            await interaction.response.send_message(f"Added the {role} role to {member}", ephemeral=True)
 
-        @client.command(aliases=["rr", "tr", "takerole"])  # remove role
-        @has_permissions(administrator=True)
-        async def removerole(ctx, role: discord.Role = None, member: discord.Member = None):
-            if role is None:
-                return await ctx.send("Please mention a role!")
-            elif member is None:
-                await ctx.send("Please mention someone!")
-                return
+        @client.tree.command(name="removerole", description="Remove a role from a user")  # remove role
+        @app_commands.checks.has_permissions(manage_roles=True)
+        @app_commands.describe(role="The role you wish to remove",
+                               member="The user you wish to remove the role from")
+        async def removerole(interaction: discord.Interaction, role: discord.Role, member: discord.Member):
             await member.remove_roles(role)
-            await ctx.send(f"*Removed the {role} role from {member}*")
+            await interaction.response.send_message(f"Removed the {role} role from {member}", ephemeral=True)
 
 
 async def setup(bot):

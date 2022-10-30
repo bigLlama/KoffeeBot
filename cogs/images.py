@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 import random
+from discord import app_commands
+from discord.app_commands import Choice
 from PIL import Image
 from io import BytesIO
 
@@ -9,35 +11,36 @@ class images(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command()  # Ship probability
+    @app_commands.command(name="ship", description="Check your compatibility status with another user")  # Ship probability
+    @app_commands.describe(target="The user you wish to be shipped with")
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def ship(self, ctx, target: discord.Member):
+    async def ship(self, interaction: discord.Interaction, target: discord.Member):
+        random_number = str(random.randrange(1, 100))
+
         ships = Image.open("media/ship.png")
-        asset1 = ctx.author.avatar_url_as(size=128)
+        asset1 = interaction.user.avatar
         data1 = BytesIO(await asset1.read())
         pfp1 = Image.open(data1)
         pfp1 = pfp1.resize((318, 318))
         ships.paste(pfp1, (12, 14))
 
-        asset2 = target.avatar_url_as(size=128)
+        asset2 = target.avatar
         data2 = BytesIO(await asset2.read())
         pfp2 = Image.open(data2)
         pfp2 = pfp2.resize((318, 318))
         ships.paste(pfp2, (636, 14))
         ships.save("media/ships.png")
-        await ctx.send(file=discord.File("media/ships.png"))
+        await interaction.response.send_message(file=discord.File("media/ships.png"))
 
-        if target != " ":
-            await ctx.send(
-                f"The probability of you shipping with {target} is " + str(random.choices(range(1, 101))) + "%")
-        elif target == " ":
-            await ctx.send("Please mention someone")
+        await interaction.followup.send(
+            f"The probability of you shipping with {target} is **{random_number}%**")
 
     @commands.command()  # wanted command
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def wanted(self, ctx, member: discord.Member = None):
+    @app_commands.describe(member="The user you wish to be wanted")
+    async def wanted(self, interaction: discord.Interaction, member: discord.Member = None):
         if member is None:
-            member = ctx.author
+            member = interaction.user
 
         want = Image.open("media/wanted.jpg")
         asset = member.avatar_url_as(size=128)

@@ -62,9 +62,8 @@ class games(commands.Cog):
         @client.tree.command(name="coinflip", description="Heads or Tails?")
         @commands.cooldown(1, 3, commands.BucketType.user)
         @app_commands.choices(guess=[
-            Choice(name="heads", value="tails"),
-            Choice(name="Paper", value="paper"),
-            Choice(name="Scissors", value="scissors")])
+            Choice(name="Heads", value="heads"),
+            Choice(name="Tails", value="tails")])
         async def coinflip(interaction: discord.Interaction, guess: str):
             coin = ["heads", "tails"]
             outcome = random.choice(coin)
@@ -81,9 +80,9 @@ class games(commands.Cog):
                 return await interaction.response.send_message(embed=embed)
             await interaction.response.send_message("That is not a valid option")
 
-        @client.command(name='guess', aliases=['guessnumber', 'num', 'number'])
+        @client.tree.command(name="guess_the_number", description="Guess a number between 1 and 10")
         @commands.cooldown(1, 3, commands.BucketType.user)
-        async def guess(ctx):
+        async def guess(interaction: discord.Interaction):
             cpu = random.randint(1, 10)
             chances = 3
 
@@ -92,13 +91,13 @@ class games(commands.Cog):
             await interaction.response.send_message(embed=embed)
 
             def check(m):
-                return m.author == ctx.author
+                return m.author == interaction.user
 
             while chances != 0:
                 try:
                     guess = await client.wait_for(event='message', check=check, timeout=7.0)
                 except asyncio.TimeoutError:
-                    client.get_command("guess").reset_cooldown(ctx)
+                    # client.get_command("guess").reset_cooldown(ctx)
                     return await interaction.response.send_message("You did not respond in time. Be quicker next time!")
                 else:
                     if guess.content == str(cpu):
@@ -113,21 +112,22 @@ class games(commands.Cog):
                                   color=discord.Color.orange())
             await interaction.response.send_message(embed=embed)
 
-        @client.command(name='fight', aliases=['duel', '1v1'])
+        @client.tree.command(name='fight', description="Challenge another user to a 1v1 duel!")
+        @app_commands.describe(member="The user you wish to fight!")
         @commands.cooldown(1, 10, commands.BucketType.user)
-        async def fight(ctx, member: discord.Member):
+        async def fight(interaction: discord.Interaction, member: discord.Member):
 
             p1 = 100
             p2 = 100
             done = False
 
-            if member == ctx.author:
-                client.get_command("fight").reset_cooldown(ctx)
+            if member == interaction.user:
+                # client.get_command("fight").reset_cooldown(ctx)
                 return await interaction.response.send_message("You can not fight yourself!")
 
 
             embed = discord.Embed(title='Duel!',
-                                  description=f'{member.mention}, {ctx.author.name} has challenged you to a fight to the death\n'
+                                  description=f'{member.mention}, {interaction.user.name} has challenged you to a fight to the death\n'
                                               f'Respond by typing either `accept` or `retreat`',
                                   color=discord.Color.orange())
             await interaction.response.send_message(embed=embed)
@@ -138,25 +138,25 @@ class games(commands.Cog):
             try:
                 answer = await client.wait_for(event='message', check=check, timeout=10.0)
             except asyncio.TimeoutError:
-                client.get_command("fight").reset_cooldown(ctx)
+                # client.get_command("fight").reset_cooldown(ctx)
                 return await interaction.response.send_message("You did not respond in time. Be quicker next time!")
             else:
                 if answer.content.lower() == 'retreat':
-                    embed = discord.Embed(description=f'{ctx.author.mention}! {member.name} has declined your challenge', color=discord.Color.orange())
+                    embed = discord.Embed(description=f'{interaction.user.mention}! {member.name} has declined your challenge', color=discord.Color.orange())
                     return await interaction.response.send_message(embed=embed)
                 elif answer.content.lower() == 'accept':
                     embed = discord.Embed(
-                        description=f'Duel: {ctx.author.name} & {member.name} are fighting to the death',
+                        description=f'Duel: {interaction.user.name} & {member.name} are fighting to the death',
                         color=discord.Color.orange())
-                    embed.add_field(name=ctx.author.name, value=f"Health: {p1}", inline=True)
+                    embed.add_field(name=interaction.user.name, value=f"Health: {p1}", inline=True)
                     embed.add_field(name=member.name, value=f"Health: {p2}", inline=True)
                     msg = await interaction.response.send_message(embed=embed)
 
                     while done is False:
                         e = discord.Embed(
-                            description=f'Duel: {ctx.author.name} & {member.name} are fighting to the death',
+                            description=f'Duel: {interaction.user.name} & {member.name} are fighting to the death',
                             color=discord.Color.orange())
-                        e.add_field(name=ctx.author.name, value=f"Health: {p1}", inline=True)
+                        e.add_field(name=interaction.user.name, value=f"Health: {p1}", inline=True)
                         e.add_field(name=member.name, value=f"Health: {p2}", inline=True)
 
                         damage = random.randint(4, 17)
@@ -180,16 +180,16 @@ class games(commands.Cog):
 
                         if p1 == 0:
                             f = discord.Embed(
-                                description=f'{member.mention} has defeated {ctx.author.mention} and won the fight!',
+                                description=f'{member.mention} has defeated {interaction.user.mention} and won the fight!',
                                 color=discord.Color.orange())
-                            f.add_field(name=ctx.author.name, value=f"Health: 0", inline=True)
+                            f.add_field(name=interaction.user.name, value=f"Health: 0", inline=True)
                             f.add_field(name=member.name, value=f"Health: {p2}", inline=True)
                             return await msg.edit(embed=f)
                         elif p2 == 0:
                             f = discord.Embed(
-                                description=f'{ctx.author.mention} has defeated {member.mention} and won the fight!',
+                                description=f'{interaction.user.mention} has defeated {member.mention} and won the fight!',
                                 color=discord.Color.orange())
-                            f.add_field(name=ctx.author.name, value=f"Health: {p1}", inline=True)
+                            f.add_field(name=interaction.user.name, value=f"Health: {p1}", inline=True)
                             f.add_field(name=member.name, value=f"Health: 0", inline=True)
                             return await msg.edit(embed=f)
 

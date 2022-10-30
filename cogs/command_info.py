@@ -48,8 +48,6 @@ class commandsInfo(commands.Cog):
                 color=discord.Color.orange())
             embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
             embed.add_field(name=":wastebasket: clear [Amount]", value="Deletes a specified amount of text messages", inline=True)
-            embed.add_field(name=":mute: mute [user] [Reason]", value="Mutes someone", inline=True)
-            embed.add_field(name=":sound: unmute [user]", value="Unmutes someone\n", inline=True)
             embed.add_field(name=":foot: kick [user] [Reason]", value="Kicks someone from the server", inline=True)
             embed.add_field(name=":hammer: ban [user] [Reason]", value="Bans someone from the server",
                             inline=True)
@@ -71,8 +69,6 @@ class commandsInfo(commands.Cog):
             embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
             embed.add_field(name=":wave: greet", value="KoffeeBot introduces\n itself", inline=True)
             embed.add_field(name=":thumbsup: poll [message]", value="Creates a poll", inline=True)
-            embed.add_field(name=":sewing_needle: nick [user] [nickname]", value="Change the nickname of a specified user",
-                            inline=True)
             embed.add_field(name=":performing_arts: avatar", value="View a user's profile picture", inline=True)
             embed.add_field(name=":bellhop: invite", value="Add KoffeeBot to other servers", inline=True)
             embed.add_field(name=':hourglass: support', value="Have any problems with KoffeeBot?")
