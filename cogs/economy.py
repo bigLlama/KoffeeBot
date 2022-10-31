@@ -1,12 +1,12 @@
 import discord
 from discord import app_commands
+from discord.app_commands import Choice
 from discord.ext import commands
 from discord.ext.commands import has_permissions
 from discord.ext.commands import BucketType
 import random
 import sqlite3
 import asyncio
-import time
 import re
 
 itemlist = ["<:mug:950689993867788338> mug:",
@@ -312,19 +312,19 @@ class Economy(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command(name="vote")
-    async def vote(self, ctx):
+    @app_commands.command(name="vote", description="Vote for KoffeeBot and receive a reward")
+    async def vote(self, interactin: discord.Interaction):
         embed = discord.Embed(color=discord.Color.orange())
         embed.set_thumbnail(
             url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
         embed.add_field(name='Enjoying KoffeeBot?',
                         value="[Vote for me on top.gg!](https://top.gg/bot/901223515242508309/vote/)")
-        await ctx.send(embed=embed)
+        await interactin.response.send_message(embed=embed)
 
-    @commands.command(name="balance", aliases=['bal', 'wallet'])
-    async def balance(self, ctx, member: discord.Member = None):
+    @app_commands.command(name="balance", description="View your current balance")
+    async def balance(self, interaction: discord.Interaction, member: discord.Member = None):
         if member is None:
-            member = ctx.author
+            member = interaction.user
         open_wallet(member)
 
         db = sqlite3.connect('kof_db.sqlite')
@@ -333,31 +333,32 @@ class Economy(commands.Cog):
         result = cursor.fetchone()
 
         embed = discord.Embed(color=discord.Color.orange())
-        embed.set_author(name=f"{member.name}'s Balance", icon=member.avatar)
+        embed.set_author(name=f"{member.name}'s Balance", icon_url=member.avatar)
         embed.add_field(name="Wallet:", value=f"<:KoffeeKoin:939562780363726868> {'{:,}'.format(result[1])}",
                         inline=False)
         embed.add_field(name="Bank:", value=f"<:KoffeeKoin:939562780363726868> {'{:,}'.format(result[2])}",
                         inline=False)
         embed.set_footer(text=f"Low on cash? Vote for me using 'kof vote' to earn a bit extra")
-        embed.set_thumbnail(url=ctx.guild.icon)
-        await ctx.send(embed=embed)
+        embed.set_thumbnail(url=interaction.guild.icon)
+        await interaction.response.send_message(embed=embed)
 
-    @commands.command(name='cheat')
-    async def cheat(self, ctx, member: discord.Member, amount):
+    @app_commands.command(name='cheat', description="Magically enter some money into someone's wallet")
+    @app_commands.describe(member="The uesr who's wallet needs money", amount="The amount of money you wish to give this user")
+    async def cheat(self, interaction: discord.Interaction, member: discord.Member, amount: int):
         open_wallet(member)
-        user = ctx.author
+        user = interaction.user
         amount = int(amount)
         responses = ["no", "get lost!", "uhm...no", "You're not allowed to use this command :D"]
 
         if user.id == 465839240777826324:
             add_bal(member, amount)
-            await ctx.send(f"Gave <:KoffeeKoin:939562780363726868> **{'{:,}'.format(amount)}** to {member.name}")
+            await interaction.response.send_message(f"Gave <:KoffeeKoin:939562780363726868> **{'{:,}'.format(amount)}** to {member.name}")
         else:
-            await ctx.send(random.choice(responses))
+            await interaction.response.send_message(random.choice(responses))
 
-    @commands.command(name="beg")  # beg command
+    @app_commands.command(name="beg", description="Beg the rich for some money")  # beg command
     @commands.cooldown(1, 30, commands.BucketType.user)
-    async def beg(self, ctx):
+    async def beg(self, interaction: discord.Interaction):
         possibility = random.randint(1, 6)
         none = ["No money for you!",
                 "Stop begging!",
@@ -368,78 +369,77 @@ class Economy(commands.Cog):
         big_amount = random.randrange(800, 1100)
 
         if possibility == 3:
-            return await ctx.send(
-                random.choice(none)
-            )
+            return await interaction.response.send_message(random.choice(none))
         if possibility == 6:
-            add_bal(ctx.author, big_amount)
-            return await ctx.send(f"Wow! You received a generous donation of <:KoffeeKoin:939562780363726868> *"
-                                  f"*{'{:,}'.format(big_amount)}**")
+            add_bal(interaction.user, big_amount)
+            return await interaction.response.send_message(f"Wow! You received a "
+                f"generous donation of <:KoffeeKoin:939562780363726868> **{'{:,}'.format(big_amount)}**")
 
         outcomes = [
             f"You got <:KoffeeKoin:939562780363726868> **{'{:,}'.format(amount)}** from a nice old lady",
             f"You received <:KoffeeKoin:939562780363726868> **{'{:,}'.format(amount)}** from a stranger",
             f"You begged your mom for <:KoffeeKoin:939562780363726868> **{'{:,}'.format(amount)}**"]
 
-        add_bal(ctx.author, amount)
-        await ctx.send(random.choice(outcomes))
+        add_bal(interaction.user, amount)
+        await interaction.response.send_message(random.choice(outcomes))
 
-    @commands.command(name="give")  # give money command
+    @app_commands.command(name="give", description="Give someone money or an item")  # give money command
     @commands.cooldown(1, 10, BucketType.user)
-    async def give(self, ctx, member: discord.Member, amount, item=None):
+    async def give(self, interaction: discord.Interaction, member: discord.Member, amount: int, item: str = None):
         db = sqlite3.connect('kof_db.sqlite')
         cursor = db.cursor()
         cursor.execute(
-            f"SELECT * FROM ingredients INNER JOIN recipes USING (member_id) WHERE member_id = {ctx.author.id}")
+            f"SELECT * FROM ingredients INNER JOIN recipes USING (member_id) WHERE member_id = {interaction.user.id}")
         result = cursor.fetchone()
         all_items = itemID + recipeList
 
-        open_wallet(ctx.author)
+        open_wallet(interaction.user)
         open_wallet(member)
 
         if not str(amount).isnumeric():  # error checking
-            return await ctx.send("Try typing a number next time!")
+            return await interaction.response.send_message("Try typing a number next time!")
         amount = int(amount)
         if amount < 1:
-            return await ctx.send("You can't give someone a negative amount!")
+            return await interaction.response.send_message("You can't give someone a negative amount!")
 
         if item is not None:  # item handling
             for i in range(len(all_items)):
                 if item == all_items[i]:
                     if amount > result[i + 1]:
-                        await ctx.send(f"You do not own {amount} `{all_items[i]}`. Try using the command correctly")
+                        await interaction.response.send_message(f"You do not own {amount} `{all_items[i]}`. Try using the command correctly")
                         return
                     else:
                         add_item(member, amount, item, i)
-                        remove_item(ctx.author, amount, item, i)
-                        await ctx.send(f"Gave {amount} `{all_items[i]}` to {member.name}")
+                        remove_item(interaction.user, amount, item, i)
+                        await interaction.response.send_message(f"Gave {amount} `{all_items[i]}` to {member.name}")
         else:
-            if not check_bal_greater_than(ctx.author, amount):
-                return await ctx.send("Your amount cannot be greater than your wallet")
+            if not check_bal_greater_than(interaction.user, amount):
+                return await interaction.response.send_message("Your amount cannot be greater than your wallet")
 
-            remove_bal(ctx.author, amount)
+            remove_bal(interaction.user, amount)
             add_bal(member, amount)
-            await ctx.send(f"Gave <:KoffeeKoin:939562780363726868> **{'{:,}'.format(amount)}** to {member.name}")
+            await interaction.response.send_message(f"Gave <:KoffeeKoin:939562780363726868> **{'{:,}'.format(amount)}** to {member.name}")
 
-    @commands.command(name="steal", aliases=["rob"])  # steal money command
+    @app_commands.command(name="steal", description="Attempt to steal money from someone's wallet")  # steal money command
+    @app_commands.describe(member="You user you wish to rob")
     @commands.cooldown(1, 60, BucketType.user)
-    async def steal(self, ctx, member: discord.Member):
+    async def steal(self, interaction: discord.Interaction, member: discord.Member):
         chance = [1, 2]
         steal_chance = random.choice(chance)
-        open_wallet(ctx.author)
+        open_wallet(interaction.user)
         open_wallet(member)
         db = sqlite3.connect('kof_db.sqlite')
         cursor = db.cursor()
-        cursor.execute(f"SELECT * from wallets WHERE member_id = {ctx.author.id}")
+        cursor.execute(f"SELECT * from wallets WHERE member_id = {interaction.user.id}")
         result = cursor.fetchone()
 
-        if member == ctx.author:
-            self.client.get_command("steal").reset_cooldown(ctx)
-            return await ctx.send("You cannot steal from yourself!")
+        if member == interaction.user:
+            self.client.get_command("steal").reset_cooldown(interaction)
+            return await interaction.response.send_message("You cannot steal from yourself!")
 
         if result[1] < 500:
-            self.client.get_command("steal").reset_cooldown(ctx)
-            return await ctx.send(
+            self.client.get_command("steal").reset_cooldown(interaction)
+            return await interaction.response.send_message(
                 "You need at least <:KoffeeKoin:939562780363726868> **500** in your wallet to rob someone")
 
         cursor.execute(f"SELECT * from wallets WHERE member_id = {member.id}")
@@ -447,72 +447,72 @@ class Economy(commands.Cog):
         steal_money = random.choice(range(1, result[1]))
 
         if result[1] < 500 or result[1] == 0:
-            self.client.get_command("steal").reset_cooldown(ctx)
-            return await ctx.send(
+            self.client.get_command("steal").reset_cooldown(interaction)
+            return await interaction.response.send_message(
                 "Your target needs to have at least <:KoffeeKoin:939562780363726868> **500** in their wallet for you to rob "
                 "them")
 
         if steal_chance == 1:
             remove_bal(member, steal_money)
-            add_bal(ctx.author, steal_money)
-            await ctx.send(f"You stole <:KoffeeKoin:939562780363726868> **{'{:,}'.format(steal_money)}** from {member}")
+            add_bal(interaction.user, steal_money)
+            await interaction.response.send_message(f"You stole <:KoffeeKoin:939562780363726868> **{'{:,}'.format(steal_money)}** from {member}")
         else:
-            remove_bal(ctx.author, 500)
+            remove_bal(interaction.user, 500)
             add_bal(member, 500)
-            await ctx.send("You were caught and paid your victim <:KoffeeKoin:939562780363726868> **500**")
+            await interaction.response.send_message("You were caught and paid your victim <:KoffeeKoin:939562780363726868> **500**")
 
     @commands.command(name='heist', aliases=['bankrob'])
     @commands.cooldown(1, 21600, BucketType.user)
-    async def heist(self, ctx, member: discord.Member):
+    async def heist(self, interaction: discord.Interaction, member: discord.Member):
         db = sqlite3.connect('kof_db.sqlite')
         cursor = db.cursor()
-        cursor.execute(f"SELECT * from mafia WHERE member_id = {ctx.author.id}")
+        cursor.execute(f"SELECT * from mafia WHERE member_id = {interaction.user.id}")
         result = cursor.fetchone()
         mafname = result[1]
 
         if result[2] != 'Boss':
-            self.client.get_command("heist").reset_cooldown(ctx)
-            return await ctx.send("Only the Boss can start a heist!")
+            self.client.get_command("heist").reset_cooldown(interaction)
+            return await interaction.response.send_message("Only the Boss can start a heist!")
 
         cursor.execute(f"SELECT * from mafia WHERE member_id = {member.id}")
         result = cursor.fetchone()
         if result[1] == mafname:
-            self.client.get_command("heist").reset_cooldown(ctx)
-            return await ctx.send(f"You can not heist someone from your own mafia")
+            self.client.get_command("heist").reset_cooldown(interaction)
+            return await interaction.response.send_message(f"You can not heist someone from your own mafia")
 
         cursor.execute(f"SELECT * from wallets WHERE member_id = {member.id}")
         result = cursor.fetchone()
         bank_val = result[2]
 
-        if member == ctx.author:
-            self.client.get_command("heist").reset_cooldown(ctx)
-            return await ctx.send("You can not rob your own bank account!")
+        if member == interaction.user:
+            self.client.get_command("heist").reset_cooldown(interaction)
+            return await interaction.response.send_message("You can not rob your own bank account!")
 
         embed = discord.Embed(title="HEIST",
-                              description=f"{ctx.author.mention} has decided to rob {member.mention}'s bank account\n"
+                              description=f"{interaction.user.mention} has decided to rob {member.mention}'s bank account\n"
                                           f"To join the heist please type `join heist` in chat.",
                               color=discord.Color.orange())
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
         chance = random.randint(1, 3)
-        heist_members = [ctx.author.name]
-        death = [ctx.author]
+        heist_members = [interaction.user.name]
+        death = [interaction.user]
         i = 0
         while i < 2:
             try:
                 msg = await self.client.wait_for(event='message', timeout=7.0)
             except asyncio.TimeoutError:
-                self.client.get_command("heist").reset_cooldown(ctx)
-                return await ctx.send(f"Not enough people responded in time. You need 3 people to start a heist")
+                self.client.get_command("heist").reset_cooldown(interaction)
+                return await interaction.response.send_message(f"Not enough people responded in time. You need 3 people to start a heist")
             else:
                 if msg.content.startswith("join heist"):
                     if msg.author == member:
-                        await ctx.send("You can not join a heist against you")
+                        await interaction.response.send_message("You can not join a heist against you")
                         continue
                     cursor.execute(f"SELECT * from mafia WHERE member_id = {msg.author.id}")
                     result = cursor.fetchone()
                     if result[1] != mafname:
-                        await ctx.send(f"Only members from {mafname} can join this heist")
+                        await interaction.response.send_message(f"Only members from {mafname} can join this heist")
                         continue
                     if msg.author.name not in heist_members:
                         heist_members.append(msg.author.name)
@@ -520,13 +520,13 @@ class Economy(commands.Cog):
                     else:
                         continue
                     i += 1
-                    await ctx.send(f"{msg.author.name} has joined the heist!")
+                    await interaction.response.send_message(f"{msg.author.name} has joined the heist!")
 
         embed = discord.Embed(title="HEIST",
                               description=f"{heist_members[0]}, {heist_members[1]}, and {heist_members[2]}\nare attemping to break into {member.mention}'s bank account...",
                               color=discord.Color.orange())
-        await ctx.send(embed=embed)
-        time.sleep(5)
+        await interaction.response.send_message(embed=embed)
+        await asyncio.sleep(5)
         dead = random.choice(death)
         outcome = "FAILURE"
         determine = f"You had been caught during the heist and were shot at gunpoint. `{dead.name}` did not survive"
@@ -559,30 +559,31 @@ class Economy(commands.Cog):
             db.commit()
 
         embed = discord.Embed(title=f"{outcome}", description=f"{determine}", color=discord.Color.orange())
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
-    @commands.command(name="dep", aliases=['deposit'])  # deposit command
+    @app_commands.command(name="deposit", description="Deposit money into your bank account")  # deposit command
+    @app_commands.describe(amount="Enter an amount, or use max/all to deposit all your money")
     @commands.cooldown(1, 3, BucketType.user)
-    async def dep(self, ctx, amount):
+    async def dep(self, interaction: discord.Interaction, amount: str):
         sql = ''
         val = 0
 
         db = sqlite3.connect('kof_db.sqlite')
         cursor = db.cursor()
-        cursor.execute(f"SELECT * from wallets WHERE member_id = {ctx.author.id}")
+        cursor.execute(f"SELECT * from wallets WHERE member_id = {interaction.user.id}")
         result = cursor.fetchone()
 
         if result[1] == 0:
-            return await ctx.send("You don't have any money to deposit")
+            return await interaction.response.send_message("You don't have any money to deposit")
 
         done = False
         amount = str(amount)
         if str(amount) == "all" or str(amount) == "max":
             sql = "UPDATE wallets SET bank = ? WHERE member_id = ?"
-            val = (result[2] + result[1], ctx.author.id)
-            await ctx.send(
+            val = (result[2] + result[1], interaction.user.id)
+            await interaction.response.send_message(
                 f"Successfully deposited <:KoffeeKoin:939562780363726868> **{'{:,}'.format(result[1])}** into your bank account")
-            remove_bal(ctx.author, result[1])
+            remove_bal(interaction.user, result[1])
             done = True
         if not done:
             try:
@@ -590,52 +591,53 @@ class Economy(commands.Cog):
                 assert amount > 0
 
             except AssertionError:
-                return await ctx.send("You can not deposit negative money")
+                return await interaction.response.send_message("You can not deposit negative money")
             except ValueError:
-                return await ctx.send("Maybe try typing an actual number!")
+                return await interaction.response.send_message("Maybe try typing an actual number!")
 
             if result[1] < amount:
-                return await ctx.send(
+                return await interaction.response.send_message(
                     f"You cannot deposit more than <:KoffeeKoin:939562780363726868> **{'{:,}'.format(result[1])}**")
 
             sql = "UPDATE wallets SET bank = ? WHERE member_id = ?"
-            val = (result[2] + amount, ctx.author.id)
-            await ctx.send(
+            val = (result[2] + amount, interaction.user.id)
+            await interaction.response.send_message(
                 f"Successfully deposited <:KoffeeKoin:939562780363726868> **{'{:,}'.format(amount)}** into your bank account"
             )
-            remove_bal(ctx.author, amount)
+            remove_bal(interaction.user, amount)
 
         cursor.execute(sql, val)
         db.commit()
 
-    @commands.command(name='scam')  # scam command
+    @app_commands.command(name='scam', description="Scam people for their money")  # scam command
     @commands.cooldown(1, 30, commands.BucketType.user)
-    async def scam(self, ctx):
+    async def scam(self, interaction: discord.Interaction):
         chance = [1, 2, 3]
         amount = random.randrange(500, 2000)
 
         if chance == 2:
-            return await ctx.send("You went scamming and came home empty handed :(")
+            return await interaction.response.send_message("You went scamming and came home empty handed :(")
         else:
-            await ctx.send(f"You scammed some guy for <:KoffeeKoin:939562780363726868> *"
+            await interaction.response.send_message(f"You scammed some guy for <:KoffeeKoin:939562780363726868> *"
                            f"*{'{:,}'.format(amount)}**")
-            add_bal(ctx.author, amount)
+            add_bal(interaction.user, amount)
 
-    @commands.command(name="with", aliases=['withdraw'])  # withdraw money command
+    @app_commands.command(name="withdraw", description="Withdraw from your bank account into your wallet")  # withdraw money command
+    @app_commands.describe(amount="The amount of money you wish to withdraw")
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def withdraw(self, ctx, amount: str):
+    async def withdraw(self, interaction: discord.Interaction, amount: str):
         sql = ''
         val = 0
 
-        open_wallet(user=ctx.author)
+        open_wallet(user=interaction.user)
         db = sqlite3.connect('kof_db.sqlite')
         cursor = db.cursor()
-        cursor.execute(f"SELECT * FROM wallets WHERE member_id = {ctx.author.id}")
+        cursor.execute(f"SELECT * FROM wallets WHERE member_id = {interaction.user.id}")
         result = cursor.fetchone()
 
         amount = str(amount)
         if result[2] == 0:
-            return await ctx.send(
+            return await interaction.response.send_message(
                 "You dont have any money in your bank :|"
             )
 
@@ -643,12 +645,12 @@ class Economy(commands.Cog):
 
         if str(amount) == "max" or str(amount) == "all":
             amount = result[2]
-            await ctx.send(
+            await interaction.response.send_message(
                 f"Successfully withdrawn <:KoffeeKoin:939562780363726868> **{'{:,}'.format(amount)}** from your bank account")
             sql = "UPDATE wallets SET bank = ? WHERE member_id = ?"
-            val = (0, ctx.author.id)
+            val = (0, interaction.user.id)
 
-            add_bal(ctx.author, result[2])
+            add_bal(interaction.user, result[2])
             done = True
 
         if not done:
@@ -657,19 +659,19 @@ class Economy(commands.Cog):
                 assert amount > 0
 
             except AssertionError:
-                return await ctx.send("You can not deposit negative money")
+                return await interaction.response.send_message("You can not deposit negative money")
             except ValueError:
-                return await ctx.send(
+                return await interaction.response.send_message(
                     "Maybe try typing an actual number next time!")
 
             if int(amount) > result[2]:
-                return await ctx.send(
+                return await interaction.response.send_message(
                     "You cannot withdraw an amount bigger than your bank balance :|")
             else:
                 sql = "UPDATE wallets SET bank = ? WHERE member_id = ?"
-                val = (result[2] - amount, ctx.author.id)
-                add_bal(ctx.author, amount)
-                await ctx.send(
+                val = (result[2] - amount, interaction.user.id)
+                add_bal(interaction.user, amount)
+                await interaction.response.send_message(
                     f"Successfully withdrawn <:KoffeeKoin:939562780363726868> **{'{:,}'.format(amount)}** from your bank account"
                 )
 
@@ -678,9 +680,9 @@ class Economy(commands.Cog):
         cursor.close()
         db.close()
 
-    @commands.command(name="recipes", aliases=["recipe"])
+    @app_commands.command(name="recipes", description="Displays all current recipes to craft items")
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def recipes(self, ctx):
+    async def recipes(self, interaction: discord.Interaction):
         embed = discord.Embed(title='Recipes', color=discord.Color.orange())
         embed.set_thumbnail(
             url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
@@ -706,12 +708,13 @@ class Economy(commands.Cog):
                               "<:sugar:951066869304029214> *sugar: **3***\n"
                               ":spoon: *spoon: **1***\n"
                               "<:teabag:957760498902900806> *teabag: **1***")
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
-    @commands.command(name='craft', aliases=["create"])
+    @app_commands.command(name='craft', description="Craft an item")
+    @app_commands.describe(item="The item you wish to craft", amount="The amount of items you wish to craft")
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def craft(self, ctx, item, amount=1):
-        user = ctx.author
+    async def craft(self, interaction: discord.Interaction, item: str, amount: int = 1):
+        user = interaction.user
         db = sqlite3.connect('kof_db.sqlite')
         cursor = db.cursor()
         cursor.execute(f"SELECT * FROM ingredients WHERE member_id = {user.id}")
@@ -724,7 +727,7 @@ class Economy(commands.Cog):
                 if result[x + 1] >= ccoffeeRecipeAmount[x] * amount:
                     hasEnough.append(x)
             if len(hasEnough) == len(ccoffeeRecipeAmount):
-                await ctx.send(f"You've crafted {amount} `common coffee`")
+                await interaction.response.send_message(f"You've crafted {amount} `common coffee`")
                 add_crafted_item(user, amount, item, 1)
                 remove_item(user, 1 * amount, itemID[0], 0)
                 remove_item(user, 3 * amount, itemID[1], 1)
@@ -732,14 +735,14 @@ class Economy(commands.Cog):
                 remove_item(user, 2 * amount, itemID[4], 4)
                 remove_item(user, 1 * amount, itemID[5], 5)
             else:
-                await ctx.send("You do not have enough ingredients to craft this item")
+                await interaction.response.send_message("You do not have enough ingredients to craft this item")
 
         elif item == recipeList[1]:  # rcoffee
             for x in range(len(rcoffeeRecipeAmount)):
                 if result[x + 1] >= rcoffeeRecipeAmount[x] * amount:
                     hasEnough.append(x)
             if len(hasEnough) == len(rcoffeeRecipeAmount):
-                await ctx.send(f"You've crafted {amount} `rare coffee`")
+                await interaction.response.send_message(f"You've crafted {amount} `rare coffee`")
                 add_crafted_item(user, amount, item, 2)
                 remove_item(user, 1 * amount, itemID[0], 0)
                 remove_item(user, 7 * amount, itemID[1], 1)
@@ -747,14 +750,14 @@ class Economy(commands.Cog):
                 remove_item(user, 3 * amount, itemID[4], 4)
                 remove_item(user, 1 * amount, itemID[6], 6)
             else:
-                await ctx.send("You do not have enough ingredients to craft this item")
+                await interaction.response.send_message("You do not have enough ingredients to craft this item")
 
         elif item == recipeList[2]:  # tea
             for x in range(len(teaRecipeAmount)):
                 if result[x + 1] >= teaRecipeAmount[x] * amount:
                     hasEnough.append(x)
             if len(hasEnough) == len(teaRecipeAmount):
-                await ctx.send(f"You've crafted {amount} `tea`")
+                await interaction.response.send_message(f"You've crafted {amount} `tea`")
                 add_crafted_item(user, amount, item, 3)
                 remove_item(user, 1 * amount, itemID[0], 0)
                 remove_item(user, 1 * amount, itemID[2], 2)
@@ -762,41 +765,19 @@ class Economy(commands.Cog):
                 remove_item(user, 1 * amount, itemID[5], 5)
                 remove_item(user, 1 * amount, itemID[7], 7)
             else:
-                await ctx.send("You do not have enough ingredients to craft this item")
+                await interaction.response.send_message("You do not have enough ingredients to craft this item")
         else:
-            await ctx.send("That is not a craftable item")
+            await interaction.response.send_message("That is not a craftable item")
 
-    @commands.command(name='use')  # use item
-    @has_permissions(administrator=True)
+
+    @app_commands.command(name='shop', description="Opens up the KoffeeBot shop")
+    @app_commands.choices(page=[
+        Choice(name="Page 1", value=1),
+        Choice(name="Page 2", value=2)])
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def use(self, ctx, item):
-        user = ctx.author
-        amount = int(1)
-        db = sqlite3.connect('kof_db.sqlite')
-        cursor = db.cursor()
-        cursor.execute(f"SELECT * FROM wallets WHERE member_id = {user.id}")
-        result = cursor.fetchone()
+    async def shop(self, interaction: discord.Interaction, page: int):
 
-        recipes = ["ccoffee", "rcoffee"]
-        itemName = ["common coffee", "rare coffee"]
-        for i in range(len(recipes)):
-            if item == recipes[i]:
-                if result[i + 10] < 1:
-                    await ctx.send(f"You do not own any `{itemName[i]}`. Go and craft some")
-                    break
-                else:
-                    await ctx.send(f"Used `{itemName[i]}`")
-                    remove_item(ctx.author, amount, item, i + 7)
-                    break
-            else:
-                await ctx.send("That is not a craftable item")
-                continue
-
-    @commands.command(name='shop')
-    @commands.cooldown(1, 3, commands.BucketType.user)
-    async def shop(self, ctx, category=1):
-
-        if category == 1:
+        if page == 1:
             embed = discord.Embed(title='Shop 1', color=discord.Color.orange())
             embed.set_thumbnail(
                 url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
@@ -813,8 +794,8 @@ class Economy(commands.Cog):
             embed.add_field(name=":spoon: *spoon:*  <:KoffeeKoin:939562780363726868> **1,000**", value="ID: `spoon`",
                             inline=False)
             embed.set_footer(text='Shop 1/2')
-            await ctx.send(embed=embed)
-        if category == 2:
+            await interaction.response.send_message(embed=embed)
+        if page == 2:
             embed = discord.Embed(title='Shop 2', color=discord.Color.orange())
             embed.set_thumbnail(
                 url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
@@ -828,11 +809,12 @@ class Economy(commands.Cog):
             embed.add_field(name="<:hat:984285090190360657> mafia hat <:KoffeeKoin:939562780363726868> **500,000**",
                             value="ID: `hat`", inline=False)
             embed.set_footer(text='Shop 2/2')
-            await ctx.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
 
-    @commands.command(name='buy')  # buy command
-    async def buy(self, ctx, item, amount=1):
-        user = ctx.author
+    @app_commands.command(name='buy', description="Buy an item from the KoffeeBot shop")  # buy command
+    @app_commands.describe(item="The item you wish to purchase", amount="The amount of items you wish to purchase")
+    async def buy(self, interaction: discord.Interaction, item: str, amount: int = 1):
+        user = interaction.user
         db = sqlite3.connect('kof_db.sqlite')
         cursor = db.cursor()
         cursor.execute(f"SELECT * FROM wallets WHERE member_id = {user.id}")
@@ -841,17 +823,18 @@ class Economy(commands.Cog):
         for i in range(len(itemID)):
             if item == itemID[i]:
                 if itemvalue[i] * amount > result[1]:
-                    return await ctx.send("Insufficient funds")
-                await ctx.send(f"Purchased {amount} `{itemID[i]}` for <:KoffeeKoin:939562780363726868>**"
+                    return await interaction.response.send_message("Insufficient funds")
+                await interaction.response.send_message(f"Purchased {amount} `{itemID[i]}` for <:KoffeeKoin:939562780363726868>**"
                                f"{'{:,}'.format(itemvalue[i] * amount)}**")
-                remove_bal(ctx.author, itemvalue[i] * amount)
-                add_item(ctx.author, amount, item, i)
+                remove_bal(interaction.user, itemvalue[i] * amount)
+                add_item(interaction.user, amount, item, i)
                 break
 
-    @commands.command(name='sell')  # sell command
+    @app_commands.command(name='sell', description="Sell an item")  # sell command
+    @app_commands.describe(item="The item you wish to sell", amount="The amount of items you wish to sell")
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def sell(self, ctx, item, amount=1):
-        user = ctx.author
+    async def sell(self, interaction: discord.Interaction, item: str, amount: int = 1):
+        user = interaction.user
         db = sqlite3.connect('kof_db.sqlite')
         cursor = db.cursor()
         cursor.execute(f"SELECT * FROM ingredients WHERE member_id = {user.id}")
@@ -860,22 +843,23 @@ class Economy(commands.Cog):
         for i in range(len(itemID)):
             if item == itemID[i]:
                 if int(amount) > int(result[i + 1]):
-                    await ctx.send("You cannot sell more than you have")
+                    await interaction.response.send_message("You cannot sell more than you have")
                     return
                 if result[i + 1] == 0:
-                    await ctx.send("You have nothing to sell!")
+                    await interaction.response.send_message("You have nothing to sell!")
                     return
-                await ctx.send(f"Sold {amount} `{itemID[i]}` for <:KoffeeKoin:939562780363726868>"
+                await interaction.response.send_message(f"Sold {amount} `{itemID[i]}` for <:KoffeeKoin:939562780363726868>"
                                f"**{'{:,}'.format(round((itemvalue[i] * amount / 2)))}**")
-                add_bal(ctx.author, round(itemvalue[i] * amount / 2))
-                remove_item(ctx.author, amount, item, i)
+                add_bal(interaction.user, round(itemvalue[i] * amount / 2))
+                remove_item(interaction.user, amount, item, i)
                 break
 
-    @commands.command(name='inventory', aliases=['inv'])  # inventory command
+    @app_commands.command(name='inventory', description="Opens up your inventory")  # inventory command
+    @app_commands.describe(user="The user who's inventory you wish to view")
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def inventory(self, ctx, user: discord.Member = None):
+    async def inventory(self, interaction: discord.Interaction, user: discord.Member = None):
         if user is None:
-            user = ctx.author
+            user = interaction.user
         db = sqlite3.connect('kof_db.sqlite')
         cursor = db.cursor()
         cursor.execute(f"SELECT * FROM ingredients INNER JOIN recipes USING (member_id) WHERE member_id = {user.id}")
@@ -883,7 +867,7 @@ class Economy(commands.Cog):
         all_items = itemID + recipeList
 
         embed = discord.Embed(title=f"{user.name}'s inventory", color=discord.Color.orange())
-        embed.set_thumbnail(url=user.iconavatar)
+        embed.set_thumbnail(url=user.avatar)
         inven = []
         for i in range(len(all_items)):
             if result[i + 1] != 0:
@@ -892,17 +876,17 @@ class Economy(commands.Cog):
             embed.add_field(name=f"{itemlist[i]}  {result[i + 1]}", value=f"ID: `{all_items[i]}`",
                             inline=False)
 
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
-    @commands.command(name='job', aliases=['jobs', 'joblist'])  # job list
-    async def job(self, ctx):
+    @app_commands.command(name='joblist', description="Shows all current available jobs")  # job list
+    async def joblist(self, interaction: discord.Interaction):
         embed = discord.Embed(title="Current available jobs",
                               description="`kof work [job]` to select a job\n"
                                           "`kof work` to start working\n"
                                           "`kof resign` to quit your current job",
                               color=discord.Color.orange())
 
-        embed.set_thumbnail(url=ctx.guild.icon)
+        embed.set_thumbnail(url=interaction.guild.icon)
         embed.add_field(name='Babysitter 👶',
                         value='Requires: <:tea:959165836042588250>\nSalary: <:KoffeeKoin:939562780363726868> **5,000**',
                         inline=False)
@@ -917,16 +901,22 @@ class Economy(commands.Cog):
                         value='Requires: <:rare_coffee:951551480215789658>\nSalary: <:KoffeeKoin:939562780363726868> **15,000**',
                         inline=False)
 
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
-    @commands.command(name='work')  # work command
+    @app_commands.command(name='work', description="Start working at your job")  # work command
+    @app_commands.choices(job=[
+        Choice(name="Babysitter", value="babysitter"),
+        Choice(name="Teacher", value="teacher"),
+        Choice(name="Accountant", value="accountant"),
+        Choice(name="Programmer", value="programmer"),
+        Choice(name="Lawyer", value="lawyer")])
     @commands.cooldown(1, 3600, commands.BucketType.user)
-    async def work(self, ctx, job=None):
+    async def work(self, interaction: discord.Interaction, job: str = None):
 
-        open_wallet(user=ctx.author)
+        open_wallet(user=interaction.user)
         db = sqlite3.connect('kof_db.sqlite')
         cursor = db.cursor()
-        cursor.execute(f"SELECT * FROM wallets INNER JOIN recipes USING (member_id) WHERE member_id = {ctx.author.id}")
+        cursor.execute(f"SELECT * FROM wallets INNER JOIN recipes USING (member_id) WHERE member_id = {interaction.user.id}")
         result = cursor.fetchone()
 
         joblist = ['babysitter', 'teacher', 'accountant', 'programmer', 'lawyer']
@@ -949,156 +939,156 @@ class Economy(commands.Cog):
 
                     if tired_chance == 9:
                         if result[3] == "babysitter":
-                            await ctx.send(
+                            await interaction.response.send_message(
                                 f"You have used up all your <:tea:959165836042588250> `tea`. Without it you cannot work\n"
                                 "You will need to craft a new form of energy and start looking for a job again")
-                            update_job(ctx.author, 'unemployed')
-                            remove_crafted_item(ctx.author, 1, "tea", 3)
-                            self.client.get_command("work").reset_cooldown(ctx)
+                            update_job(interaction.user, 'unemployed')
+                            remove_crafted_item(interaction.user, 1, "tea", 3)
+                            self.client.get_command("work").reset_cooldown(interaction)
                             return
                         elif result[3] == "teacher":
-                            await ctx.send(f"You have used up all your ☕ `ccoffee`. Without it you cannot work\n"
+                            await interaction.response.send_message(f"You have used up all your ☕ `ccoffee`. Without it you cannot work\n"
                                            "You will need to craft a new form of energy and start looking for a job again")
-                            update_job(ctx.author, 'unemployed')
-                            remove_crafted_item(ctx.author, 1, "ccoffee", 1)
-                            self.client.get_command("work").reset_cooldown(ctx)
+                            update_job(interaction.user, 'unemployed')
+                            remove_crafted_item(interaction.user, 1, "ccoffee", 1)
+                            self.client.get_command("work").reset_cooldown(interaction)
                             return
                         elif result[3] == "accountant":
-                            await ctx.send(f"You have used up all your ☕ `ccoffee`. Without it you cannot work\n"
+                            await interaction.response.send_message(f"You have used up all your ☕ `ccoffee`. Without it you cannot work\n"
                                            "You will need to craft a new form of energy and start looking for a job again")
-                            update_job(ctx.author, 'unemployed')
-                            remove_crafted_item(ctx.author, 1, "ccoffee", 1)
-                            self.client.get_command("work").reset_cooldown(ctx)
+                            update_job(interaction.user, 'unemployed')
+                            remove_crafted_item(interaction.user, 1, "ccoffee", 1)
+                            self.client.get_command("work").reset_cooldown(interaction)
                             return
                         elif result[3] == "programmer":
-                            await ctx.send(
+                            await interaction.response.send_message(
                                 f"You have used up all your <:rare_coffee:951551480215789658> `rcoffee`. Without it you cannot work\n"
                                 "You will need to craft a new form of energy and start looking for a job again")
-                            update_job(ctx.author, 'unemployed')
-                            remove_crafted_item(ctx.author, 1, "rcoffee", 2)
-                            self.client.get_command("work").reset_cooldown(ctx)
+                            update_job(interaction.user, 'unemployed')
+                            remove_crafted_item(interaction.user, 1, "rcoffee", 2)
+                            self.client.get_command("work").reset_cooldown(interaction)
                             return
                         elif result[3] == "lawyer":
-                            await ctx.send(
+                            await interaction.response.send_message(
                                 f"You have used up all your <:rare_coffee:951551480215789658> `rcoffee`. Without it you cannot work\n"
                                 "You will need to craft a new form of energy and start looking for a job again")
-                            update_job(ctx.author, 'unemployed')
-                            remove_crafted_item(ctx.author, 1, "rcoffee", 2)
-                            self.client.get_command("work").reset_cooldown(ctx)
+                            update_job(interaction.user, 'unemployed')
+                            remove_crafted_item(interaction.user, 1, "rcoffee", 2)
+                            self.client.get_command("work").reset_cooldown(interaction)
                             return
 
                     if fire_chance == 19:
-                        await ctx.send(random.choice(fire))
-                        update_job(ctx.author, 'unemployed')
+                        await interaction.response.send_message(random.choice(fire))
+                        update_job(interaction.user, 'unemployed')
                         return
                     else:
-                        add_bal(ctx.author, salary[i])
-                        await ctx.send(random.choice(outcomes))
+                        add_bal(interaction.user, salary[i])
+                        await interaction.response.send_message(random.choice(outcomes))
                         return
 
         elif job == 'babysitter':
             if result[3] != 'unemployed':
-                self.client.get_command("work").reset_cooldown(ctx)
-                return await ctx.send('You already have a job!')
+                self.client.get_command("work").reset_cooldown(interaction)
+                return await interaction.response.send_message('You already have a job!')
 
             if result[6] < 1:
-                self.client.get_command("work").reset_cooldown(ctx)
-                return await ctx.send(
+                self.client.get_command("work").reset_cooldown(interaction)
+                return await interaction.response.send_message(
                     "You need to craft at least 1 <:tea:959165836042588250> `tea` to qualify for this job")
             else:
-                await ctx.send("You are now a babysitter. Use `kof work` to start working")
-                self.client.get_command("work").reset_cooldown(ctx)
-                update_job(ctx.author, job)
+                await interaction.response.send_message("You are now a babysitter. Use `kof work` to start working")
+                self.client.get_command("work").reset_cooldown(interaction)
+                update_job(interaction.user, job)
                 return
 
         elif job == 'teacher':
             if result[3] != 'unemployed':
-                self.client.get_command("work").reset_cooldown(ctx)
-                return await ctx.send('You already have a job!')
+                self.client.get_command("work").reset_cooldown(interaction)
+                return await interaction.response.send_message('You already have a job!')
 
             if result[4] < 1:
-                self.client.get_command("work").reset_cooldown(ctx)
-                return await ctx.send("You need to craft at least 1 ☕ `ccoffee` to qualify for this job")
+                self.client.get_command("work").reset_cooldown(interaction)
+                return await interaction.response.send_message("You need to craft at least 1 ☕ `ccoffee` to qualify for this job")
             else:
-                await ctx.send("You are now a teacher. Use `kof work` to start working")
-                self.client.get_command("work").reset_cooldown(ctx)
-                update_job(ctx.author, job)
+                await interaction.response.send_message("You are now a teacher. Use `kof work` to start working")
+                self.client.get_command("work").reset_cooldown(interaction)
+                update_job(interaction.user, job)
                 return
 
         elif job == 'accountant':
             if result[3] != 'unemployed':
-                self.client.get_command("work").reset_cooldown(ctx)
-                return await ctx.send('You already have a job!')
+                self.client.get_command("work").reset_cooldown(interaction)
+                return await interaction.response.send_message('You already have a job!')
 
             if result[4] < 1:
-                self.client.get_command("work").reset_cooldown(ctx)
-                return await ctx.send("You need to craft at least 1 ☕ `ccoffee` to qualify for this job")
+                self.client.get_command("work").reset_cooldown(interaction)
+                return await interaction.response.send_message("You need to craft at least 1 ☕ `ccoffee` to qualify for this job")
             else:
-                await ctx.send("You are now an accountant. Use `kof work` to start working")
-                self.client.get_command("work").reset_cooldown(ctx)
-                update_job(ctx.author, job)
+                await interaction.response.send_message("You are now an accountant. Use `kof work` to start working")
+                self.client.get_command("work").reset_cooldown(interaction)
+                update_job(interaction.user, job)
                 return
 
         elif job == 'programmer':
             if result[3] != 'unemployed':
-                self.client.get_command("work").reset_cooldown(ctx)
-                return await ctx.send('You already have a job!')
+                self.client.get_command("work").reset_cooldown(interaction)
+                return await interaction.response.send_message('You already have a job!')
 
             if result[5] < 1:
-                self.client.get_command("work").reset_cooldown(ctx)
-                return await ctx.send("You need to craft at least 1 ☕ `rcoffee` to qualify for this job")
+                self.client.get_command("work").reset_cooldown(interaction)
+                return await interaction.response.send_message("You need to craft at least 1 ☕ `rcoffee` to qualify for this job")
             else:
-                update_job(ctx.author, job)
-                await ctx.send("You are now a programmer. Use `kof work` to start working")
-                self.client.get_command("work").reset_cooldown(ctx)
+                update_job(interaction.user, job)
+                await interaction.response.send_message("You are now a programmer. Use `kof work` to start working")
+                self.client.get_command("work").reset_cooldown(interaction)
                 return
         elif job == 'lawyer':
             if result[3] != 'unemployed':
-                self.client.get_command("work").reset_cooldown(ctx)
-                return await ctx.send('You already have a job!')
+                self.client.get_command("work").reset_cooldown(interaction)
+                return await interaction.response.send_message('You already have a job!')
 
             if result[5] < 1:
-                self.client.get_command("work").reset_cooldown(ctx)
-                return await ctx.send("You need to craft at least 1 ☕ `rcoffee` to qualify for this job")
+                self.client.get_command("work").reset_cooldown(interaction)
+                return await interaction.response.send_message("You need to craft at least 1 ☕ `rcoffee` to qualify for this job")
             else:
-                await ctx.send("You are now a lawyer. Use `kof work` to start working")
-                self.client.get_command("work").reset_cooldown(ctx)
-                update_job(ctx.author, job)
+                await interaction.response.send_message("You are now a lawyer. Use `kof work` to start working")
+                self.client.get_command("work").reset_cooldown(interaction)
+                update_job(interaction.user, job)
                 return
 
         if result[3] == 'unemployed':
-            await ctx.send("You are currently unemployed. Use `kof jobs` to look for a job")
-            self.client.get_command("work").reset_cooldown(ctx)
+            await interaction.response.send_message("You are currently unemployed. Use `kof jobs` to look for a job")
+            self.client.get_command("work").reset_cooldown(interaction)
             return
 
-    @commands.command(name='resign', aliases=['quit'])
+    @app_commands.command(name='resign', description="Quit your job")
     @commands.cooldown(1, 30, commands.BucketType.user)
-    async def resign(self, ctx):
+    async def resign(self, interaction: discord.Interaction):
         db = sqlite3.connect('kof_db.sqlite')
         cursor = db.cursor()
-        cursor.execute(f"SELECT * FROM wallets WHERE member_id = {ctx.author.id}")
+        cursor.execute(f"SELECT * FROM wallets WHERE member_id = {interaction.user.id}")
         result = cursor.fetchone()
 
         if result[3] == 'unemployed':
-            await ctx.send("You are already unemployed")
+            await interaction.response.send_message("You are already unemployed")
             return
 
-        await ctx.send("You have quit your current job...you will need to wait an hour before choosing a new job")
-        update_job(ctx.author, 'unemployed')
+        await interaction.response.send_message("You have quit your current job...you will need to wait an hour before choosing a new job")
+        update_job(interaction.user, 'unemployed')
 
-    @commands.command(name='daily')  # daily command
+    @app_commands.command(name='daily', description="Receive your daily amount of money")  # daily command
     @commands.cooldown(1, 86400, commands.BucketType.user)
-    async def daily(self, ctx):
-        open_wallet(user=ctx.author)
+    async def daily(self, interaction: discord.Interaction):
+        open_wallet(user=interaction.user)
         daily_amount = 25000
-        await ctx.send(
+        await interaction.response.send_message(
             f"You have recieved your daily amount of <:KoffeeKoin:939562780363726868> **{'{:,}'.format(daily_amount)}**")
-        add_bal(ctx.author, daily_amount)
+        add_bal(interaction.user, daily_amount)
 
-    @commands.command(name='lucky', aliases=['luck'])  # lucky command
+    @app_commands.command(name='lucky', description="Is it your lucky day?")  # lucky command
     @commands.cooldown(1, 30, commands.BucketType.user)
-    async def lucky(self, ctx):
-        open_wallet(user=ctx.author)
+    async def lucky(self, interaction: discord.Interaction):
+        open_wallet(user=interaction.user)
         rand_int = random.randint(1, 6)
         luck_money = random.randint(500, 2500)
         random_items = ["mug",
@@ -1116,17 +1106,18 @@ class Economy(commands.Cog):
                  f"You checked under your shoe and found <:KoffeeKoin:939562780363726868> **{'{:,}'.format(luck_money)}**!",
                  f"A strange bag falls out of the sky. You open it and find <:KoffeeKoin:939562780363726868> **{'{:,}'.format(luck_money)}**"]
         if rand_int == 2 or rand_int == 4:
-            await ctx.send(random.choice(lucks))
-            add_bal(ctx.author, luck_money)
+            await interaction.response.send_message(random.choice(lucks))
+            add_bal(interaction.user, luck_money)
         elif rand_int == 3:
-            await ctx.send(f"Oh look! You found {item_quantity} `{random_item}`")
-            add_item(ctx.author, item_quantity, random_item, random_items.index(random_item) + 1)
+            await interaction.response.send_message(f"Oh look! You found {item_quantity} `{random_item}`")
+            add_item(interaction.user, item_quantity, random_item, random_items.index(random_item) + 1)
         else:
-            await ctx.send("You're not feeling particularly lucky today")
+            await interaction.response.send_message("You're not feeling particularly lucky today")
 
-    @commands.command(name='slots', aliases=["slot"])  # slot machine commands
+    @app_commands.command(name='slots', description="The AMAZING slot machine!")  # slot machine commands
+    @app_commands.describe(amount="The amount of money you wish to bet. Minimum 500 required")
     @commands.cooldown(1, 45, commands.BucketType.user)
-    async def slots(self, ctx, amount):
+    async def slots(self, interaction: discord.Interaction, amount: int):
         outcomes = [":banana:", ":cherries:", ":candy:"]
         one = random.choice(outcomes)
         two = random.choice(outcomes)
@@ -1134,75 +1125,69 @@ class Economy(commands.Cog):
         win = int(amount) * 7
         lose = ["Tough luck :(", "Rip your money lol", "Oof!"]
 
-        if ctx.author.id == 397118054267355149:
-            self.client.get_command("slots").reset_cooldown(ctx)
-
         try:
             amount = int(amount)
         except ValueError:
-            self.client.get_command("slots").reset_cooldown(ctx)
-            return await ctx.send(
-                "Maybe try typing an actual number"
-            )
+            self.client.get_command("slots").reset_cooldown(interaction)
+            return await interaction.response.send_message(
+                "Maybe try typing an actual number")
+
         if amount < 500:
-            self.client.get_command("slots").reset_cooldown(ctx)
-            return await ctx.send(
+            self.client.get_command("slots").reset_cooldown(interaction)
+            return await interaction.response.send_message(
                 "You need at least <:KoffeeKoin:939562780363726868> **500** in your wallet to use the slot machine"
             )
 
-        result = check_bal_greater_than(user=ctx.author, amount=amount)
+        result = check_bal_greater_than(user=interaction.user, amount=amount)
         if result is False:
-            self.client.get_command("slots").reset_cooldown(ctx)
-            return await ctx.send(
+            self.client.get_command("slots").reset_cooldown(interaction)
+            return await interaction.response.send_message(
                 "Your amount cannot be greater than your wallet :|")
 
         em1 = discord.Embed(title="=-=-=-=-=-=\n"
                                   ":red_square: :red_square: :red_square: :round_pushpin:\n"
                                   "=-=-=-=-=-=", color=discord.Color.orange())
-        em1.set_author(name="Slot machine", icon=ctx.author.iconavatar)
+        em1.set_author(name="Slot machine", icon_url=interaction.user.avatar)
         em2 = discord.Embed(title=f"=-=-=-=-=-=\n"
                                   f"{one} :red_square: :red_square: :round_pushpin:\n"
                                   "=-=-=-=-=-=", color=discord.Color.orange())
-        em2.set_author(name="Slot machine", icon=ctx.author.iconavatar)
+        em2.set_author(name="Slot machine", icon_url=interaction.user.avatar)
         em3 = discord.Embed(title=f"=-=-=-=-=-=\n"
                                   f"{one} {two} :red_square: :round_pushpin:\n"
                                   "=-=-=-=-=-=", color=discord.Color.orange())
-        em3.set_author(name="Slot machine", icon=ctx.author.iconavatar)
+        em3.set_author(name="Slot machine", icon_url=interaction.user.avatar)
         em4 = discord.Embed(title=f"=-=-=-=-=-=\n"
                                   f"{one} {two} {three} :round_pushpin:\n"
                                   "=-=-=-=-=-=", color=discord.Color.orange())
-        em4.set_author(name="Slot machine", icon=ctx.author.iconavatar)
+        em4.set_author(name="Slot machine", icon_url=interaction.user.avatar)
 
-        msg = await ctx.send(embed=em1)
-        time.sleep(0.7)
+        msg = await interaction.response.send_message(embed=em1)
         await msg.edit(embed=em2)
-        time.sleep(0.7)
         await msg.edit(embed=em3)
-        time.sleep(0.7)
         await msg.edit(embed=em4)
 
         if one == two == three:
-            add_bal(ctx.author, win - amount)
+            add_bal(interaction.user, win - amount)
             embed = discord.Embed(
-                description=f"Congratulations!!! {ctx.author.mention}\nYou won <:KoffeeKoin:939562780363726868> **{'{:,}'.format(win)}**!",
+                description=f"Congratulations!!! {interaction.user.mention}\nYou won <:KoffeeKoin:939562780363726868> **{'{:,}'.format(win)}**!",
                 color=discord.Color.orange())
-            embed.set_author(name="Slot machine", icon=ctx.author.iconavatar)
-            await ctx.send(embed=embed)
+            embed.set_author(name="Slot machine", icon_url=interaction.user.avatar)
+            await interaction.followup.send(embed=embed)
         else:
-            remove_bal(ctx.author, amount)
+            remove_bal(interaction.user, amount)
             embed = discord.Embed(description=random.choice(lose), color=discord.Color.orange())
-            embed.set_author(name="Slot machine", icon=ctx.author.iconavatar)
-            await ctx.send(embed=embed)
+            embed.set_author(name="Slot machine", icon_url=interaction.user.avatar)
+            await interaction.followup.send(embed=embed)
 
     @commands.command(name="rich", aliases=['leaderboard', 'lb'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def rich(self, ctx):
+    async def rich(self, interaction: discord.Interaction):
         db = sqlite3.connect('kof_db.sqlite')
         cursor = db.cursor()
         cursor.execute(f"SELECT * FROM wallets ORDER BY bank DESC")
         result = cursor.fetchall()
 
-        guild = ctx.author.guild
+        guild = interaction.user.guild
         memberList = guild.members
         db_array = []
         member_array = []
@@ -1220,7 +1205,7 @@ class Economy(commands.Cog):
                 valid.append(db_array[i])
 
         if len(valid) < 10:
-            return await ctx.send(
+            return await interaction.response.send_message(
                 "At least 10 people in this server need a KoffeeBot account/balance\nYou can open an account by typing `kof bal`")
 
         for i in range(len(valid)):
@@ -1245,13 +1230,13 @@ class Economy(commands.Cog):
                                           f"**9.** `{top_10[8].name}`: **<:KoffeeKoin:939562780363726868> {'{:,}**'.format(result[8][2])}\n"
                                           f"**10.** `{top_10[9].name}`: **<:KoffeeKoin:939562780363726868> {'{:,}**'.format(result[9][2])}\n",
                               color=discord.Color.orange())
-        embed.set_thumbnail(url=ctx.guild.icon)
-        await ctx.send(embed=embed)
+        embed.set_thumbnail(url=interaction.guild.icon)
+        await interaction.response.send_message(embed=embed)
 
     @commands.command(name='mafia')
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def mafia(self, ctx, action=None, target=None):
-        user = ctx.author
+    async def mafia(self, interaction: discord.Interaction, action=None, target=None):
+        user = interaction.user
 
         db = sqlite3.connect('kof_db.sqlite')
         cursor = db.cursor()
@@ -1261,38 +1246,38 @@ class Economy(commands.Cog):
 
         if action == 'create':  # creating a mafia
             if result[9] < 1:  # lack of item
-                return await ctx.send("You need a `mafia hat` to create a mafia")
+                return await interaction.response.send_message("You need a `mafia hat` to create a mafia")
             cursor.execute(f"SELECT * FROM wallets WHERE member_id = {user.id}")
             result = cursor.fetchone()
             if result[1] < 100000:  # insufficient cash
-                return await ctx.send("You need <:KoffeeKoin:939562780363726868>**100,000** to create a mafia")
+                return await interaction.response.send_message("You need <:KoffeeKoin:939562780363726868>**100,000** to create a mafia")
             cursor.execute(f"SELECT * FROM mafia WHERE member_id = {user.id}")
             result = cursor.fetchone()
             if result[1] != 'none':  # already in a mafia
-                return await ctx.send("You are already part of a mafia!")
+                return await interaction.response.send_message("You are already part of a mafia!")
             edit_mafia_name(user, target)
             edit_mafia_rank(user, 'Boss')
             open_vault(target)
             remove_bal(user, 100000)
-            return await ctx.send(f"Created mafia: `{target}`")
+            return await interaction.response.send_message(f"Created mafia: `{target}`")
 
         elif action == 'delete':  # deleting a mafia
             cursor.execute(f"SELECT * FROM mafia WHERE member_id = {user.id}")
             result = cursor.fetchone()
 
             if result[1] == 'none':
-                return await ctx.send("You are not currently in any mafia.")
+                return await interaction.response.send_message("You are not currently in any mafia.")
             if result[2] != "Boss":
-                return await ctx.send("Only the Boss can delete a mafia")
+                return await interaction.response.send_message("Only the Boss can delete a mafia")
 
-            await ctx.send(f"Are you sure you want to disband `{result[1]}` with all of its members? (yes/no)")
+            await interaction.response.send_message(f"Are you sure you want to disband `{result[1]}` with all of its members? (yes/no)")
             maf_name = result[1]
 
             try:
                 msg = await self.client.wait_for(event='message', timeout=10.0)
             except asyncio.TimeoutError:
-                self.client.get_command("mafia").reset_cooldown(ctx)
-                return await ctx.send(
+                self.client.get_command("mafia").reset_cooldown(interaction)
+                return await interaction.response.send_message(
                     f"You did not respond quick enough")
             else:
                 if msg.content.startswith("yes"):
@@ -1306,7 +1291,7 @@ class Economy(commands.Cog):
                             edit_mafia_rank(user, 'none')
                             cursor.execute(f"DELETE FROM mafias WHERE mafia_name = '{maf_name}'")
                             db.commit()
-                    return await ctx.send(f"You have disbanded your mafia: `{maf_name}`")
+                    return await interaction.response.send_message(f"You have disbanded your mafia: `{maf_name}`")
                 elif msg.content.startswith("no"):
                     await msg.add_reaction("👍")
                     return
@@ -1316,14 +1301,14 @@ class Economy(commands.Cog):
             result = cursor.fetchone()
 
             if result[1] == 'none':
-                return await ctx.send("You are not currently in any mafia.")
+                return await interaction.response.send_message("You are not currently in any mafia.")
             elif result[2] == 'Boss':
-                return await ctx.send(
+                return await interaction.response.send_message(
                     "You cannot leave your own mafia. Either promote someone else to `Boss` or disband the entire mafia")
 
             edit_mafia_name(user, 'none')
             edit_mafia_rank(user, 'none')
-            await ctx.send(f"You have left `{result[1]}`")
+            await interaction.response.send_message(f"You have left `{result[1]}`")
 
         elif action == 'invite':  # inviting to mafia
             target = target.strip('<@>')
@@ -1332,13 +1317,13 @@ class Economy(commands.Cog):
             cursor.execute(f"SELECT * FROM mafia WHERE member_id = {user.id}")
             result = cursor.fetchone()
             if result[1] == 'none':
-                return await ctx.send("You are not currently in any mafia. Create one to be able to invite other users")
+                return await interaction.response.send_message("You are not currently in any mafia. Create one to be able to invite other users")
             if result[2] == "Boss" or result[2] == "Recruiter":
                 pass
             else:
-                return await ctx.send("Only the Boss or a recruiter can invite people to the mafia")
+                return await interaction.response.send_message("Only the Boss or a recruiter can invite people to the mafia")
 
-            await ctx.send(f"{target.mention}! You have been invited to join {ctx.author.name}'s mafia: `{result[1]}`\n"
+            await interaction.response.send_message(f"{target.mention}! You have been invited to join {interaction.user.name}'s mafia: `{result[1]}`\n"
                            f"Type `accept` or `decline` in chat")
 
             def check(m):
@@ -1347,11 +1332,11 @@ class Economy(commands.Cog):
             try:
                 msg = await self.client.wait_for(event='message', check=check, timeout=10.0)
             except asyncio.TimeoutError:
-                self.client.get_command("mafia").reset_cooldown(ctx)
-                return await ctx.send(f"The person you tried to invite did not respond in time")
+                self.client.get_command("mafia").reset_cooldown(interaction)
+                return await interaction.response.send_message(f"The person you tried to invite did not respond in time")
             else:
                 if msg.content.startswith("decline"):
-                    return await ctx.send(
+                    return await interaction.response.send_message(
                         f"{user.mention}, {target.name} has declined your invitation to join {result[1]}")
                 elif msg.content.startswith("accept"):
                     open_mafia(target)
@@ -1360,43 +1345,43 @@ class Economy(commands.Cog):
                     cursor.execute(f"SELECT * FROM ingredients WHERE member_id = {target.id}")
                     result = cursor.fetchone()
                     if result[9] < 1:  # lack of item
-                        return await ctx.send("You need a `mafia hat` to join a mafia")
+                        return await interaction.response.send_message("You need a `mafia hat` to join a mafia")
 
                     cursor.execute(f"SELECT * FROM mafia WHERE member_id = {target.id}")
                     cursor.fetchone()
                     edit_mafia_name(target, maf_name)
                     edit_mafia_rank(target, "Member")
-                    return await ctx.send(f"{target.name} has joined `{maf_name}`")
+                    return await interaction.response.send_message(f"{target.name} has joined `{maf_name}`")
 
         elif action == 'kick':
             target = target.strip('<@>')
             target = await self.client.fetch_user(target)
 
-            cursor.execute(f"SELECT * FROM mafia WHERE member_id = {ctx.author.id}")
+            cursor.execute(f"SELECT * FROM mafia WHERE member_id = {interaction.user.id}")
             result = cursor.fetchone()
             mafname = result[1]
             if result[1] == 'none':
-                return await ctx.send(
+                return await interaction.response.send_message(
                     "You aren't currently in any mafia. Join or create a mafia to view your mafia stats")
             if result[2] != "Boss":
-                return await ctx.send("Only the Boss can kick members")
-            elif target == ctx.author:
-                return await ctx.send("You can not kick yourself")
+                return await interaction.response.send_message("Only the Boss can kick members")
+            elif target == interaction.user:
+                return await interaction.response.send_message("You can not kick yourself")
 
             cursor.execute(f"SELECT * FROM mafia WHERE member_id = {target.id}")
             result = cursor.fetchone()
             if result[1] != mafname:
-                return await ctx.send("This person is not in your mafia")
+                return await interaction.response.send_message("This person is not in your mafia")
             edit_mafia_name(target, 'none')
             edit_mafia_rank(target, 'none')
-            await ctx.send(f"You kicked {target.name} from `{mafname}`")
+            await interaction.response.send_message(f"You kicked {target.name} from `{mafname}`")
 
         elif action is None:  # mafia stats
             cursor.execute(f"SELECT * FROM mafia WHERE member_id = {user.id}")
             result = cursor.fetchone()
             maf_name = result[1]
             if result[1] == 'none':
-                return await ctx.send(
+                return await interaction.response.send_message(
                     "You aren't currently in any mafia. Join or create a mafia to view your mafia stats")
 
             embed = discord.Embed(title=f"<:hat:984285090190360657> {result[1]} Mafia <:hat:984285090190360657>",
@@ -1420,79 +1405,79 @@ class Economy(commands.Cog):
 
             embed.add_field(name='Mafia Info', value=f'**`Boss:` **{owner.name}\n **`Total members:`** {len(result)}',
                             inline=True)
-            await ctx.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
 
     @commands.command(name='promote')
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def promote(self, ctx, user: discord.Member):
+    async def promote(self, interaction: discord.Interaction, user: discord.Member):
         db = sqlite3.connect('kof_db.sqlite')
         cursor = db.cursor()
-        cursor.execute(f"SELECT * FROM mafia WHERE member_id = {ctx.author.id}")
+        cursor.execute(f"SELECT * FROM mafia WHERE member_id = {interaction.user.id}")
         result = cursor.fetchone()
 
         if result[1] == 'none':
-            return await ctx.send("You are not currently in a mafia")
+            return await interaction.response.send_message("You are not currently in a mafia")
         elif result[2] != 'Boss':
-            return await ctx.send("Only the Boss can promote")
-        elif user == ctx.author:
-            return await ctx.send("You can not promote yourself")
+            return await interaction.response.send_message("Only the Boss can promote")
+        elif user == interaction.user:
+            return await interaction.response.send_message("You can not promote yourself")
         mafname = result[1]
 
         cursor.execute(f"SELECT * FROM mafia WHERE member_id = {user.id}")
         result = cursor.fetchone()
         if result[1] != mafname:
-            return await ctx.send("This person is not in your mafia")
+            return await interaction.response.send_message("This person is not in your mafia")
         elif result[2] == 'Member':
             edit_mafia_rank(user, 'Recruiter')
-            return await ctx.send(f"Promoted {user.name} to rank `Recruiter`")
+            return await interaction.response.send_message(f"Promoted {user.name} to rank `Recruiter`")
 
     @commands.command(name='demote')
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def demote(self, ctx, user: discord.Member):
+    async def demote(self, interaction: discord.Interaction, user: discord.Member):
         db = sqlite3.connect('kof_db.sqlite')
         cursor = db.cursor()
-        cursor.execute(f"SELECT * FROM mafia WHERE member_id = {ctx.author.id}")
+        cursor.execute(f"SELECT * FROM mafia WHERE member_id = {interaction.user.id}")
         result = cursor.fetchone()
 
         if result[1] == 'none':
-            return await ctx.send("You are not currently in a mafia")
+            return await interaction.response.send_message("You are not currently in a mafia")
         elif result[2] != 'Boss':
-            return await ctx.send("Only the Boss can demote")
-        elif user == ctx.author:
-            return await ctx.send("You can not demote yourself")
+            return await interaction.response.send_message("Only the Boss can demote")
+        elif user == interaction.user:
+            return await interaction.response.send_message("You can not demote yourself")
         mafname = result[1]
 
         cursor.execute(f"SELECT * FROM mafia WHERE member_id = {user.id}")
         result = cursor.fetchone()
         if result[1] != mafname:
-            return await ctx.send("This person is not in your mafia")
+            return await interaction.response.send_message("This person is not in your mafia")
         elif result[2] == 'Recruiter':
             edit_mafia_rank(user, 'Member')
-            return await ctx.send(f"Demoted {user.name} to rank `Member`")
+            return await interaction.response.send_message(f"Demoted {user.name} to rank `Member`")
 
     @commands.command(name='vault')  # vault command
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def vault(self, ctx, action, amount):
-        open_mafia(ctx.author)
+    async def vault(self, interaction: discord.Interaction, action, amount):
+        open_mafia(interaction.user)
         sql = ''
         val = ''
 
         db = sqlite3.connect('kof_db.sqlite')
         cursor = db.cursor()
-        cursor.execute(f"SELECT * FROM mafia WHERE member_id = {ctx.author.id}")
+        cursor.execute(f"SELECT * FROM mafia WHERE member_id = {interaction.user.id}")
         result = cursor.fetchone()
         mafname = result[1]
 
         cursor.execute(
-            f"SELECT * FROM wallets LEFT JOIN mafias WHERE member_id = {ctx.author.id} AND mafia_name = '{mafname}'")
+            f"SELECT * FROM wallets LEFT JOIN mafias WHERE member_id = {interaction.user.id} AND mafia_name = '{mafname}'")
         result = cursor.fetchone()
 
         if result[4] == 'none':
-            return await ctx.send("You aren't currently in any mafia. Join or create a mafia")
+            return await interaction.response.send_message("You aren't currently in any mafia. Join or create a mafia")
 
         if action == 'dep' or action == 'deposit':  # deposit into vault
             if result[1] == 0:
-                return await ctx.send("You don't have any money to deposit")
+                return await interaction.response.send_message("You don't have any money to deposit")
 
             done = False
             amount = str(amount)
@@ -1500,9 +1485,9 @@ class Economy(commands.Cog):
                 sql = "UPDATE mafias SET vault = ? WHERE mafia_name = ?"
                 val = (result[5] + result[1], result[4])
 
-                await ctx.send(
+                await interaction.response.send_message(
                     f"Successfully deposited <:KoffeeKoin:939562780363726868> **{'{:,}'.format(result[1])}** into your vault")
-                remove_bal(ctx.author, result[1])
+                remove_bal(interaction.user, result[1])
 
                 done = True
             if not done:
@@ -1511,49 +1496,49 @@ class Economy(commands.Cog):
                     assert amount > 0
 
                 except AssertionError:
-                    return await ctx.send("You can not deposit negative money")
+                    return await interaction.response.send_message("You can not deposit negative money")
                 except ValueError:
-                    return await ctx.send("Maybe try typing an actual number!")
+                    return await interaction.response.send_message("Maybe try typing an actual number!")
 
                 if result[1] < amount:
-                    return await ctx.send(
+                    return await interaction.response.send_message(
                         f"You cannot deposit more than <:KoffeeKoin:939562780363726868> **{'{:,}'.format(result[1])}**")
 
                 sql = "UPDATE mafias SET vault = ? WHERE mafia_name = ?"
                 val = (result[5] + amount, result[4])
 
-                await ctx.send(
+                await interaction.response.send_message(
                     f"Successfully deposited <:KoffeeKoin:939562780363726868> **{'{:,}'.format(amount)}** into your vault")
-                remove_bal(ctx.author, amount)
+                remove_bal(interaction.user, amount)
 
             cursor.execute(sql, val)
             db.commit()
 
         elif action == 'with' or action == 'withdraw':  # withdraw from vault
-            cursor.execute(f"SELECT * FROM mafia WHERE member_id = {ctx.author.id}")
+            cursor.execute(f"SELECT * FROM mafia WHERE member_id = {interaction.user.id}")
             result = cursor.fetchone()
 
             if result[2] != 'Boss':
-                return await ctx.send("Only the Boss can withdraw from the vault")
+                return await interaction.response.send_message("Only the Boss can withdraw from the vault")
 
             cursor.execute(
-                f"SELECT * FROM wallets LEFT JOIN mafias WHERE member_id = {ctx.author.id} AND mafia_name = '{mafname}'")
+                f"SELECT * FROM wallets LEFT JOIN mafias WHERE member_id = {interaction.user.id} AND mafia_name = '{mafname}'")
             result = cursor.fetchone()
 
             amount = str(amount)
 
             if result[5] == 0:
-                return await ctx.send("You dont have any money in your vault :|")
+                return await interaction.response.send_message("You dont have any money in your vault :|")
             done = False
 
             if str(amount) == "max" or str(amount) == "all":
                 amount = result[5]
-                await ctx.send(
+                await interaction.response.send_message(
                     f"Successfully withdrawn <:KoffeeKoin:939562780363726868> **{'{:,}'.format(amount)}** from your vault")
                 sql = "UPDATE mafias SET vault = ? WHERE mafia_name = ?"
                 val = (0, result[4])
 
-                add_bal(ctx.author, result[5])
+                add_bal(interaction.user, result[5])
                 done = True
 
             if not done:
@@ -1562,19 +1547,19 @@ class Economy(commands.Cog):
                     assert amount > 0
 
                 except AssertionError:
-                    return await ctx.send("You can not deposit negative money")
+                    return await interaction.response.send_message("You can not deposit negative money")
                 except ValueError:
-                    return await ctx.send(
+                    return await interaction.response.send_message(
                         "Maybe try typing an actual number next time!")
 
                 if int(amount) > result[5]:
-                    return await ctx.send(
+                    return await interaction.response.send_message(
                         "You cannot withdraw an amount bigger than your vault balance :|")
                 else:
                     sql = "UPDATE mafias SET vault = ? WHERE mafia_name = ?"
                     val = (result[5] - amount, mafname)
-                    add_bal(ctx.author, amount)
-                    await ctx.send(
+                    add_bal(interaction.user, amount)
+                    await interaction.response.send_message(
                         f"Successfully withdrawn <:KoffeeKoin:939562780363726868> **{'{:,}'.format(amount)}** from your vault"
                     )
 
