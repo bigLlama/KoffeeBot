@@ -25,17 +25,11 @@ class utilities(commands.Cog):
             elif interaction.user.id == 660749269921169410:  # sheepy
                 await interaction.response.send_message('Hello Sheep')
                 return
-            elif interaction.user.id == 316436801499693066:  # Diorice
-                await interaction.response.send_message('Good day mr Diorice sir!')
-                return
             elif interaction.user.id == 324570286068334592:  # janlu
                 await interaction.response.send_message('My lord!')
                 return
-            elif interaction.user.id == 327888112808099840:  # vir gerhard van janlu
-                await interaction.response.send_message('jys kak in war tunder, van janlu #gethacked')
-                return
             elif interaction.user.id == 190877518029520896:  # vir juan van janlu
-                await interaction.response.send_message('jys kak in leugue og legends #getgoodfam')
+                await interaction.response.send_message('jys kak in leugue of legends #getgoodfam')
                 return
             await interaction.response.send_message(random.choice(hey))
 

@@ -67,8 +67,6 @@ async def main():
         await client.start(TOKEN)
 
 
-
-
 @client.event  # on guild join
 async def on_guild_join(guild):
     general = find(lambda x: x.name == 'general',  guild.text_channels)
@@ -76,29 +74,9 @@ async def on_guild_join(guild):
         await general.send("Hi, I'm KofeeBot. Use **kof help** to get started!")
 
 
-@client.event  # error events
-async def on_command_error(interaction: discord.Interaction, error):
-    if isinstance(error, MissingPermissions): # missing permissions
-        embed = discord.Embed(color=discord.Color.orange())
-        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
-        embed.add_field(name="Missing Permissions", value="You don't have the required\npermissions to do that!")
-        msg = await interaction.response.send_message(embed=embed)
-        time.sleep(5)
-        await msg.delete()
-
-    elif isinstance(error, MissingRequiredArgument): # missing an argument in command
-        embed = discord.Embed(color=discord.Color.orange())
-        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
-        embed.add_field(name="Missing an Argument", value="Not all the requirements have been met.\nMake sure you are "
-                                                          "using the command correctly\n Use **kof help** to help "
-                                                          "with using a command")
-        msg = await interaction.response.send_message(embed=embed)
-        time.sleep(5)
-        await msg.delete()
-        # client.get_command(ctx.invoked_with).reset_cooldown(ctx)
-
-    elif isinstance(error, commands.CommandOnCooldown): # cooldown handling
-
+@client.tree.error
+async def on_app_command_error(interaction: discord.Interaction, error: discord.app_commands.AppCommandError) -> None:
+    if isinstance(error, app_commands.errors.CommandOnCooldown):
         timer = error.retry_after
 
         if timer >= 3600:
@@ -114,9 +92,19 @@ async def on_command_error(interaction: discord.Interaction, error):
         embed.set_thumbnail(
             url=interaction.user.avatar)
         embed.add_field(name="Cooldown", value=f"You are on cooldown!\nTry again in `{round(timer)} {timer_format}`")
-        msg = await interaction.response.send_message(embed=embed)
-        time.sleep(5)
-        await msg.delete()
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    elif isinstance(error, app_commands.errors.MissingPermissions):
+        embed = discord.Embed(color=discord.Color.orange())
+        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+        embed.add_field(name="Missing Permissions", value="You don't have the required\npermissions to do that!")
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    elif isinstance(error, app_commands.errors.BotMissingPermissions):
+        embed = discord.Embed(color=discord.Color.orange())
+        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+        embed.add_field(name="Bot Missing Permissions", value="KoffeeBot does not have the required permissions to do this command. Make sure you have enabled permissions for me to do so")
+        await interaction.response.send_message(embed=embed)
 
 
 @tasks.loop(minutes=120)  # loops different status

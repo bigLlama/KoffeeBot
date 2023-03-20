@@ -16,7 +16,7 @@ class games(commands.Cog):
             Choice(name="Rock", value="rock"),
             Choice(name="Paper", value="paper"),
             Choice(name="Scissors", value="scissors")])
-        @commands.cooldown(1, 3, commands.BucketType.user)
+        @app_commands.checks.cooldown(1, 3.0, key=lambda i: (i.guild_id, i.user.id))
         async def rps(interaction: discord.Interaction, choice: str):
             weapons = ["rock", "paper", "scissors"]
             decision = random.choice(weapons)
@@ -34,7 +34,7 @@ class games(commands.Cog):
             return await interaction.response.send_message(f"I choose {decision}. You Lose!")
 
         @client.tree.command(name="bowling", description="Do you have the skill to get a strike?")  # bowling
-        @commands.cooldown(1, 3, commands.BucketType.user)
+        @app_commands.checks.cooldown(1, 3.0, key=lambda i: (i.guild_id, i.user.id))
         async def bowl(interaction: discord.Interaction):
             outcomes = ["You've YEETED the ball out of existence!!!",
                         "Strike!!",
@@ -60,7 +60,7 @@ class games(commands.Cog):
             await interaction.response.send_message(embed=embed)
 
         @client.tree.command(name="coinflip", description="Heads or Tails?")
-        @commands.cooldown(1, 3, commands.BucketType.user)
+        @app_commands.checks.cooldown(1, 3.0, key=lambda i: (i.guild_id, i.user.id))
         @app_commands.choices(guess=[
             Choice(name="Heads", value="heads"),
             Choice(name="Tails", value="tails")])
@@ -81,7 +81,7 @@ class games(commands.Cog):
             await interaction.response.send_message("That is not a valid option")
 
         @client.tree.command(name="guess_the_number", description="Guess a number between 1 and 10")
-        @commands.cooldown(1, 3, commands.BucketType.user)
+        @app_commands.checks.cooldown(1, 3.0, key=lambda i: (i.guild_id, i.user.id))
         async def guess(interaction: discord.Interaction):
             cpu = random.randint(1, 10)
             chances = 3
@@ -114,7 +114,7 @@ class games(commands.Cog):
 
         @client.tree.command(name='fight', description="Challenge another user to a 1v1 duel!")
         @app_commands.describe(member="The user you wish to fight!")
-        @commands.cooldown(1, 10, commands.BucketType.user)
+        @app_commands.checks.cooldown(1, 10.0, key=lambda i: (i.guild_id, i.user.id))
         async def fight(interaction: discord.Interaction, member: discord.Member):
 
             p1 = 100

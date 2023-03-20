@@ -34,7 +34,6 @@ class commandsInfo(commands.Cog):
             embed.add_field(name=":shield: help moderation", value="Displays all moderation commands",inline=True)
             embed.add_field(name=":jigsaw: help images", value="Displays all image manipulation commands",inline=True)
             embed.add_field(name=":pushpin: help misc", value="Displays all miscellaneous commands ", inline=True)
-            embed.add_field(name="<:hat:984285090190360657> help mafia", value="Displays all mafia commands ", inline=True)
 
             await interaction.response.send_message(embed=embed)
             return
@@ -48,14 +47,9 @@ class commandsInfo(commands.Cog):
                 color=discord.Color.orange())
             embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
             embed.add_field(name=":wastebasket: clear", value="Deletes a specified amount of text messages", inline=True)
-            embed.add_field(name=":foot: kick", value="Kicks someone from the server", inline=True)
-            embed.add_field(name=":hammer: ban", value="Bans someone from the server",
-                            inline=True)
-            embed.add_field(name=":tools: unban", value="Unbans someone\n", inline=True)
-            embed.add_field(name=":tickets: giverole", value="Give someone a role from your server",
-                            inline=True)
-            embed.add_field(name=":carpentry_saw: removerole", value="Remove a role from someone",
-                            inline=True)
+            embed.add_field(name=":tickets: giverole", value="Give someone a role from your server", inline=True)
+            embed.add_field(name=":carpentry_saw: removerole", value="Remove a role from someone", inline=True)
+            embed.add_field(name=":mag_right: inspect", value="Inspect a user", inline=True)
             await interaction.response.send_message(embed=embed)
 
         elif category.lower() == "misc":
@@ -169,28 +163,6 @@ class commandsInfo(commands.Cog):
             embed.add_field(name=":rage: angry", value="Let all that rage out", inline=True)
             embed.add_field(name=":eyes: blackmail", value="Make sure this person stays quiet",
                             inline=True)
-            await interaction.response.send_message(embed=embed)
-
-        elif category.lower() == "mafia":
-            embed = discord.Embed(
-                title="Mafia",
-                description="Descriptions are provided below each command\n"
-                            "[Support Server](https://discord.gg/fa3j7fpbA6/ 'Takes you to the official KoffeeBot "
-                            "discord')",
-                color=discord.Color.orange()
-            )
-            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
-            embed.add_field(name="<:hat:984285090190360657> mafia", value="Displays your mafia profile", inline=True)
-            embed.add_field(name="🚬 mafia create", value="Create a mafia", inline=True)
-            embed.add_field(name="✉ mafia invite", value="Invite someone into your mafia", inline=True)
-            embed.add_field(name="👌 promote", value="Promote someone in your mafia", inline=True)
-            embed.add_field(name="🦴 demote", value="Demote someone in your mafia", inline=True)
-            embed.add_field(name="👞 mafia kick", value="Kick someone from your mafia", inline=True)
-            embed.add_field(name="💼 mafia leave", value="Leave your current mafia", inline=True)
-            embed.add_field(name="🧨 mafia delete", value="Delete a mafia you have created", inline=True)
-            embed.add_field(name="🧱 heist", value="Attemp to rob someone's bank account", inline=True)
-            embed.add_field(name="🔑 vault withdraw", value="Withdraw <:KoffeeKoin:939562780363726868> from your vault", inline=True)
-            embed.add_field(name="🗝️ vault deposit", value="Deposit <:KoffeeKoin:939562780363726868> into your vault", inline=True)
             await interaction.response.send_message(embed=embed)
 
         else:

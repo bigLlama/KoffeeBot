@@ -13,7 +13,7 @@ class images(commands.Cog):
 
     @app_commands.command(name="ship", description="Check your compatibility status with another user")  # Ship probability
     @app_commands.describe(target="The user you wish to be shipped with")
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @app_commands.checks.cooldown(1, 5.0, key=lambda i: (i.guild_id, i.user.id))
     async def ship(self, interaction: discord.Interaction, target: discord.Member):
         random_number = str(random.randrange(1, 100))
 
@@ -36,7 +36,7 @@ class images(commands.Cog):
             f"The probability of you shipping with {target} is **{random_number}%**")
 
     @app_commands.command(name="wanted", description="Shows your wanted picture")  # wanted command
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @app_commands.checks.cooldown(1, 5.0, key=lambda i: (i.guild_id, i.user.id))
     @app_commands.describe(member="The user you wish to be wanted")
     async def wanted(self, interaction: discord.Interaction, member: discord.Member = None):
         if member is None:
@@ -53,7 +53,7 @@ class images(commands.Cog):
         await interaction.response.send_message(file=discord.File("media/want.jpg"))
 
     @app_commands.command(name="rip", description="Show your tombstone")  # rip command
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @app_commands.checks.cooldown(1, 5.0, key=lambda i: (i.guild_id, i.user.id))
     @app_commands.describe(member="The user you wish to see dead")
     async def rip(self, interaction: discord.Interaction, member: discord.Member = None):
         if member is None:
@@ -70,7 +70,7 @@ class images(commands.Cog):
         await interaction.response.send_message(file=discord.File("media/ded.png"))
 
     @app_commands.command(name="punch", description="Sometimes we all want to punch someone in the face")  # punch command
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @app_commands.checks.cooldown(1, 5.0, key=lambda i: (i.guild_id, i.user.id))
     @app_commands.describe(target="The user you wish to punch")
     async def punch(self, interaction: discord.Interaction, target: discord.Member):
 
@@ -97,7 +97,7 @@ class images(commands.Cog):
         await interaction.response.send_message(file=discord.File("media/hit.jpg"))
 
     @app_commands.command(name="slap", description="Slap someone who you think deserves it!")  # slap command
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @app_commands.checks.cooldown(1, 5.0, key=lambda i: (i.guild_id, i.user.id))
     @app_commands.describe(target="The user you wish to slap")
     async def slap(self, interaction: discord.Interaction, target: discord.Member):
 
@@ -118,7 +118,7 @@ class images(commands.Cog):
         await interaction.response.send_message(file=discord.File("media/slapped.jpg"))
 
     @app_commands.command(name="hug", description="hug someone who needs it <3")  # hug command
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @app_commands.checks.cooldown(1, 5.0, key=lambda i: (i.guild_id, i.user.id))
     @app_commands.describe(target="The user you wish to hug")
     async def hug(self, interaction: discord.Interaction, target: discord.Member):
 
@@ -139,7 +139,7 @@ class images(commands.Cog):
         await interaction.response.send_message(file=discord.File("media/hugged.jpg"))
 
     @app_commands.command(name="angry", description="Don't we all rage at some point?")  # angry command
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @app_commands.checks.cooldown(1, 5.0, key=lambda i: (i.guild_id, i.user.id))
     @app_commands.describe(member="The user you wish to see angry")
     async def angry(self, interaction: discord.Interaction, member: discord.Member = None):
         if member is None:
@@ -162,7 +162,7 @@ class images(commands.Cog):
         await interaction.response.send_message(file=discord.File("media/mad.jpg"))
 
     @app_commands.command(name="evil", description="Wonder what it's like to be evil?")  # evil command
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @app_commands.checks.cooldown(1, 5.0, key=lambda i: (i.guild_id, i.user.id))
     @app_commands.describe(member="The user you wish to see evil")
     async def evil(self, interaction: discord.Interaction, member: discord.Member = None):
         if member is None:
@@ -179,7 +179,7 @@ class images(commands.Cog):
         await interaction.response.send_message(file=discord.File("media/devil.jpg"))
 
     @app_commands.command(name="shoot", description="No! don't shoot!")  # shoot command
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @app_commands.checks.cooldown(1, 5.0, key=lambda i: (i.guild_id, i.user.id))
     @app_commands.describe(target="The user you wish to shoot")
     async def shoot(self, interaction: discord.Interaction, target: discord.Member):
 
@@ -200,7 +200,7 @@ class images(commands.Cog):
         await interaction.response.send_message(file=discord.File("media/shot.png"))
 
     @app_commands.command(name="blackmail", description="We can do this the easy way, or the hard way...")  # threat command
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @app_commands.checks.cooldown(1, 5.0, key=lambda i: (i.guild_id, i.user.id))
     @app_commands.describe(target="The user you wish to threaten")
     async def blackmail(self, interaction: discord.Interaction, target: discord.Member):
 
