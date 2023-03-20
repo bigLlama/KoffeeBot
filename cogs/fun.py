@@ -36,7 +36,17 @@ class fun(commands.Cog):
                       "If I throw a stick, will you leave?",
                       "I thought of you today. It reminded me to take out the trash",
                       "You are the reason why shampoo bottles have instructions",
-                      "Mirrors can't talk back. Luckily they can't laugh either"]
+                      "Mirrors can't talk back. Luckily they can't laugh either",
+                      "You are mentally handicapped",
+                      "You seem like the type of person who would know what each type of crayon tastes like",
+                      "Even skunks run when they smell you",
+                      "When I look at you, I wish I could meet you again for the first time… and walk past.",
+                      "You have such a beautiful face… But let’s put a bag over that personality.",
+                      "There is someone out there for everyone. For you, it’s a therapist.",
+                      "Whoever told you to be yourself, gave you a bad advice.",
+                      "Everyone is allowed to act stupid once, but you… you are abusing that privilege.",
+                      "Where is your off button?",
+                      "Earth is full. Go home.",]
             if person is None:
                 person = interaction.user
             embed = discord.Embed(

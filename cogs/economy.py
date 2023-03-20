@@ -271,7 +271,7 @@ class Economy(commands.Cog):
         open_wallet(member)
         user = interaction.user
         amount = int(amount)
-        responses = ["no", "get lost!", "uhm...no", "You're not allowed to use this command :D"]
+        responses = ["no", "get lost!", "uhm...no", "You're not allowed to use this command :D", "Yeah no :)"]
 
         if user.id == 465839240777826324:
             add_bal(member, amount)
