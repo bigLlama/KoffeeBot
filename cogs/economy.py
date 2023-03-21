@@ -238,8 +238,7 @@ class Economy(commands.Cog):
     @app_commands.command(name="vote", description="Vote for KoffeeBot and receive a reward")
     async def vote(self, interactin: discord.Interaction):
         embed = discord.Embed(color=discord.Color.orange())
-        embed.set_thumbnail(
-            url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
         embed.add_field(name='Enjoying KoffeeBot?',
                         value="[Vote for me on top.gg!](https://top.gg/bot/901223515242508309/vote/)")
         await interactin.response.send_message(embed=embed)
@@ -596,35 +595,41 @@ class Economy(commands.Cog):
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def shop(self, interaction: discord.Interaction, page: int):
         if page == 1:
-            embed = discord.Embed(title='Shop 1', color=discord.Color.orange())
-            embed.set_thumbnail(
-                url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+            embed = discord.Embed(title='Koffee Mart', color=discord.Color.orange())
+            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+
             embed.add_field(name="<:mug:950689993867788338> *mug:*  <:KoffeeKoin:939562780363726868> **5,000**",
                             value="ID: `mug`",
                             inline=False)
-            embed.add_field(name="<:coffee_bean:951551479989301338> *coffee bean:*  <:KoffeeKoin:939562780363726868> "
-                                 "**1,500**", value="ID: `bean`",
+            embed.add_field(name="<:coffee_bean:951551479989301338> *coffee bean:* <:KoffeeKoin:939562780363726868> **1,500**",
+                            value="ID: `bean`",
                             inline=False)
-            embed.add_field(name=":milk: *milk:*  <:KoffeeKoin:939562780363726868> **10,000**", value="ID: `milk`",
+            embed.add_field(name=":milk: *milk:*  <:KoffeeKoin:939562780363726868> **10,000**",
+                            value="ID: `milk`",
                             inline=False)
             embed.add_field(name="<:sugar:951066869304029214> *sugar:*  <:KoffeeKoin:939562780363726868> **2,500**",
-                            value="ID: `sugar`", inline=False)
-            embed.add_field(name=":spoon: *spoon:*  <:KoffeeKoin:939562780363726868> **1,000**", value="ID: `spoon`",
+                            value="ID: `sugar`",
                             inline=False)
-            embed.set_footer(text='Shop 1/2')
+            embed.add_field(name=":spoon: *spoon:*  <:KoffeeKoin:939562780363726868> **1,000**",
+                            value="ID: `spoon`",
+                            inline=False)
+            embed.set_footer(text='Page 1/2')
             await interaction.response.send_message(embed=embed)
+
         if page == 2:
-            embed = discord.Embed(title='Shop 2', color=discord.Color.orange())
-            embed.set_thumbnail(
-                url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
-            embed.add_field(name="<:gspoon:951731109312479243> *golden spoon:*  <:KoffeeKoin:939562780363726868> "
-                                 "**15,000**", value="ID: `gspoon`", inline=False)
-            embed.add_field(
-                name="<:pmilk:951741856264368128> *premium milk:*  <:KoffeeKoin:939562780363726868> **50,000**",
-                value="ID: `pmilk`", inline=False)
+            embed = discord.Embed(title='Koffee Mart', color=discord.Color.orange())
+            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+
+            embed.add_field(name="<:gspoon:951731109312479243> *golden spoon:*  <:KoffeeKoin:939562780363726868> **15,000**",
+                            value="ID: `gspoon`",
+                            inline=False)
+            embed.add_field(name="<:pmilk:951741856264368128> *premium milk:*  <:KoffeeKoin:939562780363726868> **50,000**",
+                            value="ID: `pmilk`",
+                            inline=False)
             embed.add_field(name="<:teabag:957760498902900806> teabag <:KoffeeKoin:939562780363726868> **5,000**",
-                            value="ID: `teabag`", inline=False)
-            embed.set_footer(text='Shop 2/2')
+                            value="ID: `teabag`",
+                            inline=False)
+            embed.set_footer(text='Page 2/2')
             await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name='buy', description="Buy an item from the KoffeeBot shop")  # buy command

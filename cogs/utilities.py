@@ -33,34 +33,35 @@ class utilities(commands.Cog):
                 return
             await interaction.response.send_message(random.choice(hey))
 
+        @client.tree.command(name="poll", description="Make a poll")
+        @app_commands.describe(topic="The topic of the poll")
+        async def poll(interaction: discord.Interaction, topic: str, option1: str, option2: str,
+                       option3: str = None, option4: str = None, option5: str = None, option6: str = None,
+                       option7: str = None, option8: str = None, option9: str = None, option10: str = None):
 
-        # @client.tree.command(name="poll")  # make a poll
-        # @app_commands.describe(question="Type your poll question here")
-        # async def poll(interaction: discord.Interaction, question: str, options: str):
-        #     if len(options) <= 1:
-        #         await interaction.response.send_message('You need more than one option to make a poll!')
-        #         return
-        #     if len(options) > 10:
-        #         await interaction.response.send_message('You cannot make a poll for more than 10 things!')
-        #         return
-        #
-        #     if len(options) == 2 and options[0] == 'yes' and options[1] == 'no':
-        #         reactions = ['✅', '❌']
-        #     else:
-        #         reactions = ['1⃣', '2⃣', '3⃣', '4⃣', '5⃣', '6⃣', '7⃣', '8⃣', '9⃣', '🔟']
-        #
-        #     description = []
-        #     for x, option in enumerate(options):
-        #         description += '\n {} {}'.format(reactions[x], option)
-        #     embed = discord.Embed(title=question, description=''.join(description), color=discord.Color.orange())
-        #     embed.set_thumbnail(
-        #         url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
-        #     embed.set_footer(text=f"Poll created by {interaction.user}", icon_url=interaction.user.avatar)
-        #     react_message = await interaction.response.send_message(embed=embed)
-        #     for reaction in reactions[:len(options)]:
-        #         await react_message.add_reaction(reaction)
-        #     await react_message.edit_message(embed=embed)
+            option_list = [option1, option2, option3, option4, option5, option6, option7, option8, option9, option10]
+            num = ['\u0031\u20E3', '\u0032\u20E3', '\u0033\u20E3', '\u0034\u20E3', '\u0035\u20E3',
+                    '\u0036\u20E3', '\u0037\u20E3', '\u0038\u20E3', '\u0039\u20E3', '\u0030\u20E3']
 
+            # see which options are populated
+            i = 0
+            items = []
+            for item in option_list:
+                if item is not None:
+                    items.append(item)
+                    i += 1
+
+            # add populated items to the poll list (embed description)
+            desc = ""
+            for y, item in enumerate(items):
+                desc += f"{num[y]} {item}\n"
+
+            embed = discord.Embed(title=topic, description=desc, color=discord.Color.orange())
+            await interaction.response.send_message(f"**{interaction.user.mention} started a poll:**")
+            message = await interaction.channel.send(embed=embed)
+
+            for x in range(i):
+                await message.add_reaction(num[x])
 
 
         @client.tree.command(name="avatar", description="View someone's discord profile picture")  # avatar command

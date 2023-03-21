@@ -20,18 +20,22 @@ class games(commands.Cog):
         async def rps(interaction: discord.Interaction, choice: str):
             weapons = ["rock", "paper", "scissors"]
             decision = random.choice(weapons)
-            choice = choice.lower()
-
-            if choice == decision:
-                return await interaction.response.send_message(f"I choose {decision}. It's a Tie!")
 
             def win(player, cpu):
                 if (player == 'rock' and cpu == 'scissors') or (player == 'scissors' and cpu == 'paper') or (player == 'paper' and cpu == 'rock'):
                     return True
 
             if win(choice, decision):
-                return await interaction.response.send_message(f"I choose {decision}. You Win!")
-            return await interaction.response.send_message(f"I choose {decision}. You Lose!")
+                result = f"You chose `{choice}`\nI chose `{decision}`\n**You Win!**"
+            else:
+                result = f"You chose `{choice}`\nI chose `{decision}`\n**You Lose!**"
+
+            if choice == decision:
+                result = f"You chose `{choice}`\nI chose `{decision}`\n**It's a Tie!**"
+
+            embed = discord.Embed(title="Rock Paper Scissors", description=result, color=discord.Color.orange())
+            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+            await interaction.response.send_message(embed=embed)
 
         @client.tree.command(name="bowling", description="Do you have the skill to get a strike?")  # bowling
         @app_commands.checks.cooldown(1, 3.0, key=lambda i: (i.guild_id, i.user.id))
