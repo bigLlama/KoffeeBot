@@ -14,7 +14,6 @@ class commandsInfo(commands.Cog):
         Choice(name="Economy", value="economy"),
         Choice(name="Games", value="Games"),
         Choice(name="Images", value="Images"),
-        Choice(name="Mafia", value="Mafia"),
         Choice(name="Fun", value="Fun"),
         Choice(name="Miscellaneous", value="Misc"),
         Choice(name="Moderation", value="Moderation")])
@@ -25,9 +24,9 @@ class commandsInfo(commands.Cog):
                 description="Descriptions are provided below each command\n" 
                             "[Support Server](https://discord.gg/fa3j7fpbA6/ 'Takes you to the official KoffeeBot "
                             "discord')",
-                color=discord.Color.orange()
+                color=discord.Color.blue()
             )
-            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
             embed.add_field(name=":tada: help fun", value="Displays all fun related commands",inline=True)
             embed.add_field(name=":moneybag: help economy", value="Displays all economy commands", inline=True)
             embed.add_field(name=":game_die: help games", value="Displays all game related commands",inline=True)
@@ -44,8 +43,8 @@ class commandsInfo(commands.Cog):
                 description="Descriptions are provided below each command\n"
                             "[Support Server](https://discord.gg/fa3j7fpbA6/ 'Takes you to the official KoffeeBot "
                             "discord')",
-                color=discord.Color.orange())
-            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+                color=discord.Color.blue())
+            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
             embed.add_field(name=":wastebasket: clear", value="Deletes a specified amount of text messages", inline=True)
             embed.add_field(name=":tickets: giverole", value="Give someone a role from your server", inline=True)
             embed.add_field(name=":carpentry_saw: removerole", value="Remove a role from someone", inline=True)
@@ -58,9 +57,9 @@ class commandsInfo(commands.Cog):
                 description="Descriptions are provided below each command\n"
                             "[Support Server](https://discord.gg/fa3j7fpbA6/ 'Takes you to the official KoffeeBot "
                             "discord')",
-                color=discord.Color.orange()
+                color=discord.Color.blue()
             )
-            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
             embed.add_field(name=":wave: greet", value="KoffeeBot introduces\n itself", inline=True)
             embed.add_field(name=":thumbsup: poll", value="Creates a poll", inline=True)
             embed.add_field(name=":performing_arts: avatar", value="View a user's profile picture", inline=True)
@@ -75,9 +74,9 @@ class commandsInfo(commands.Cog):
                 description="Descriptions are provided below each command\n"
                             "[Support Server](https://discord.gg/fa3j7fpbA6/ 'Takes you to the official KoffeeBot "
                             "discord')",
-                color=discord.Color.orange()
+                color=discord.Color.blue()
             )
-            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
             embed.add_field(name=":8ball: 8ball", value="Ask the magical 8ball any question you like",
                             inline=True)
             embed.add_field(name=":rofl: roast", value="Roasts someone", inline=True)
@@ -97,9 +96,9 @@ class commandsInfo(commands.Cog):
                 description="Descriptions are provided below each command\n"
                             "[Support Server](https://discord.gg/fa3j7fpbA6/ 'Takes you to the official KoffeeBot "
                             "discord')",
-                color=discord.Color.orange()
+                color=discord.Color.blue()
             )
-            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
             embed.add_field(name=":scissors: rps", value="Play a game of Rock, Paper, Scissors", inline=True)
             embed.add_field(name=":bowling: bowl", value="Enjoy some bowling\n", inline=True)
             embed.add_field(name="⭕ coinflip", value="Heads or Tails!!!",inline=True)
@@ -113,10 +112,10 @@ class commandsInfo(commands.Cog):
                 description="Descriptions are provided below each command\n"
                             "[Support Server](https://discord.gg/fa3j7fpbA6/ 'Takes you to the official KoffeeBot "
                             "discord')",
-                color=discord.Color.orange()
+                color=discord.Color.blue()
             )
             embed.set_thumbnail(
-                url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+                url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
             embed.add_field(name="💳 bal", value="Check your balance/ open an account")
             embed.add_field(name='💼 inv', value="Displays your inventory")
             embed.add_field(name=':calendar: daily', value="Receive your daily amount of <:KoffeeKoin:939562780363726868>")
@@ -146,10 +145,10 @@ class commandsInfo(commands.Cog):
                 description="Descriptions are provided below each command\n"
                             "[Support Server](https://discord.gg/fa3j7fpbA6/ 'Takes you to the official KoffeeBot "
                             "discord')",
-                color=discord.Color.orange()
+                color=discord.Color.blue()
             )
             embed.set_thumbnail(
-                url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+                url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
             embed.add_field(name=":detective: wanted", value="Shows your wanted picture", inline=True)
             embed.add_field(name=":coffin: rip", value="You died?", inline=True)
             embed.add_field(name=":punch: punch", value="Punch someone!\n", inline=True)

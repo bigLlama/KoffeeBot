@@ -3,7 +3,6 @@ from discord import app_commands
 from discord.app_commands import Choice
 from discord.ext import commands
 from discord.ext.commands import has_permissions
-from discord.ext.commands import BucketType
 import random
 import sqlite3
 import asyncio
@@ -20,6 +19,7 @@ itemlist = ["<:mug:950689993867788338> mug:",
             "☕ common coffee",
             "<:rare_coffee:951551480215789658> rare coffee",
             "<:tea:959165836042588250> tea"]
+
 itemID = ["mug",
           "bean",
           "milk",
@@ -28,6 +28,7 @@ itemID = ["mug",
           "spoon",
           "gspoon",
           "teabag"]
+
 itemvalue = [5000,  # mug
              1500,  # bean
              10000,  # milk
@@ -36,6 +37,7 @@ itemvalue = [5000,  # mug
              1000,  # spoon
              15000,  # gspoon
              5000]  # teabag
+
 recipeList = ["ccoffee",
               "rcoffee",
               "tea"]
@@ -237,8 +239,8 @@ class Economy(commands.Cog):
 
     @app_commands.command(name="vote", description="Vote for KoffeeBot and receive a reward")
     async def vote(self, interactin: discord.Interaction):
-        embed = discord.Embed(color=discord.Color.orange())
-        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+        embed = discord.Embed(color=discord.Color.blue())
+        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
         embed.add_field(name='Enjoying KoffeeBot?',
                         value="[Vote for me on top.gg!](https://top.gg/bot/901223515242508309/vote/)")
         await interactin.response.send_message(embed=embed)
@@ -254,14 +256,14 @@ class Economy(commands.Cog):
         cursor.execute(f"SELECT * FROM wallets WHERE member_id = {member.id}")
         result = cursor.fetchone()
 
-        embed = discord.Embed(color=discord.Color.orange())
+        embed = discord.Embed(color=discord.Color.blue())
         embed.set_author(name=f"{member.name}'s Balance", icon_url=member.avatar)
         embed.add_field(name="Wallet:", value=f"<:KoffeeKoin:939562780363726868> {'{:,}'.format(result[1])}",
                         inline=False)
         embed.add_field(name="Bank:", value=f"<:KoffeeKoin:939562780363726868> {'{:,}'.format(result[2])}",
                         inline=False)
-        embed.set_footer(text=f"Low on cash? Vote for me using 'kof vote' to earn a bit extra")
-        embed.set_thumbnail(url=interaction.guild.icon)
+        embed.set_footer(text=f"Low on cash? Vote for me using '/vote' to earn a bit extra")
+        embed.set_thumbnail(url=interaction.user.avatar)
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name='cheat', description="Magically enter some money into someone's wallet")
@@ -501,9 +503,9 @@ class Economy(commands.Cog):
     @app_commands.command(name="recipes", description="Displays all current recipes to craft items")
     @app_commands.checks.cooldown(1, 3.0, key=lambda i: (i.guild_id, i.user.id))
     async def recipes(self, interaction: discord.Interaction):
-        embed = discord.Embed(title='Recipes', color=discord.Color.orange())
+        embed = discord.Embed(title='Recipes', color=discord.Color.blue())
         embed.set_thumbnail(
-            url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+            url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
         embed.add_field(name=":coffee: common coffee `ID: ccoffee`",
                         value="<:mug:950689993867788338> *mug: **1***\n"
                               "<:coffee_bean:951551479989301338> *coffee bean: **3***\n"
@@ -595,8 +597,8 @@ class Economy(commands.Cog):
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def shop(self, interaction: discord.Interaction, page: int):
         if page == 1:
-            embed = discord.Embed(title='Koffee Mart', color=discord.Color.orange())
-            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+            embed = discord.Embed(title='Koffee Mart', color=discord.Color.blue())
+            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
 
             embed.add_field(name="<:mug:950689993867788338> *mug:*  <:KoffeeKoin:939562780363726868> **5,000**",
                             value="ID: `mug`",
@@ -617,8 +619,8 @@ class Economy(commands.Cog):
             await interaction.response.send_message(embed=embed)
 
         if page == 2:
-            embed = discord.Embed(title='Koffee Mart', color=discord.Color.orange())
-            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+            embed = discord.Embed(title='Koffee Mart', color=discord.Color.blue())
+            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
 
             embed.add_field(name="<:gspoon:951731109312479243> *golden spoon:*  <:KoffeeKoin:939562780363726868> **15,000**",
                             value="ID: `gspoon`",
@@ -661,8 +663,8 @@ class Economy(commands.Cog):
                     desc = f"You do not have enough <:KoffeeKoin:939562780363726868> in your wallet to make this purchase"
                     error = True
 
-                embed = discord.Embed(title=title, description=desc, color=discord.Color.orange())
-                embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+                embed = discord.Embed(title=title, description=desc, color=discord.Color.blue())
+                embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
                 await interaction.response.send_message(embed=embed)
 
                 if not error:
@@ -701,9 +703,9 @@ class Economy(commands.Cog):
                     desc = "You cannot sell more items than you have in your inventory!"
                     error = True
 
-                embed = discord.Embed(title=title, description=desc, color=discord.Color.orange())
+                embed = discord.Embed(title=title, description=desc, color=discord.Color.blue())
                 embed.set_thumbnail(
-                    url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+                    url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
                 await interaction.response.send_message(embed=embed)
 
                 if not error:
@@ -723,7 +725,7 @@ class Economy(commands.Cog):
         result = cursor.fetchone()
         all_items = itemID + recipeList
 
-        embed = discord.Embed(title=f"{user.name}'s inventory", color=discord.Color.orange())
+        embed = discord.Embed(title=f"{user.name}'s inventory", color=discord.Color.blue())
         embed.set_thumbnail(url=user.avatar)
         inven = []
         for i in range(len(all_items)):
@@ -741,7 +743,7 @@ class Economy(commands.Cog):
                               description="`/job to select a job\n"
                                           "`/work` to start working\n"
                                           "`/resign` to quit your current job",
-                              color=discord.Color.orange())
+                              color=discord.Color.blue())
 
         embed.set_thumbnail(url=interaction.guild.icon)
         embed.add_field(name='Babysitter 👶',
@@ -791,7 +793,7 @@ class Economy(commands.Cog):
                     return await interaction.response.send_message(
                         f"You need to craft at least 1 {needed_item[i]} to qualify for this job")
                 else:
-                    await interaction.response.send_message(f"Your jobtitle is now: **{jobtype}**. Use `kof work` to start working")
+                    await interaction.response.send_message(f"Your jobtitle is now: **{jobtype}**. Use `/work` to start working")
                     update_job(interaction.user, job)
                     return
 
@@ -817,7 +819,7 @@ class Economy(commands.Cog):
         tired_chance = random.randint(1, 20)
 
         if result[3] == 'unemployed':
-            await interaction.response.send_message("You are currently unemployed. Use `kof jobs` to look for a job")
+            await interaction.response.send_message("You are currently unemployed. Use `/joblist` to look for a job")
             app_commands.Cooldown.reset(work_cd)
             return
 
@@ -852,7 +854,7 @@ class Economy(commands.Cog):
                     await interaction.response.send_message(random.choice(outcomes))
                     return
 
-    @app_commands.command(name='resign', description="Quit your job")
+    @app_commands.command(name='resign', description="Quit your job") # quit current job
     async def resign(self, interaction: discord.Interaction):
         db = sqlite3.connect('kof_db.sqlite')
         cursor = db.cursor()
@@ -928,19 +930,19 @@ class Economy(commands.Cog):
 
         em1 = discord.Embed(title="=-=-=-=-=-=\n"
                                   ":red_square: :red_square: :red_square: :round_pushpin:\n"
-                                  "=-=-=-=-=-=", color=discord.Color.orange())
+                                  "=-=-=-=-=-=", color=discord.Color.blue())
         em1.set_author(name="Slot machine", icon_url=interaction.user.avatar)
         em2 = discord.Embed(title=f"=-=-=-=-=-=\n"
                                   f"{one} :red_square: :red_square: :round_pushpin:\n"
-                                  "=-=-=-=-=-=", color=discord.Color.orange())
+                                  "=-=-=-=-=-=", color=discord.Color.blue())
         em2.set_author(name="Slot machine", icon_url=interaction.user.avatar)
         em3 = discord.Embed(title=f"=-=-=-=-=-=\n"
                                   f"{one} {two} :red_square: :round_pushpin:\n"
-                                  "=-=-=-=-=-=", color=discord.Color.orange())
+                                  "=-=-=-=-=-=", color=discord.Color.blue())
         em3.set_author(name="Slot machine", icon_url=interaction.user.avatar)
         em4 = discord.Embed(title=f"=-=-=-=-=-=\n"
                                   f"{one} {two} {three} :round_pushpin:\n"
-                                  "=-=-=-=-=-=", color=discord.Color.orange())
+                                  "=-=-=-=-=-=", color=discord.Color.blue())
         em4.set_author(name="Slot machine", icon_url=interaction.user.avatar)
 
         await interaction.response.send_message(embed=em1)
@@ -952,12 +954,12 @@ class Economy(commands.Cog):
             add_bal(interaction.user, win - amount)
             embed = discord.Embed(
                 description=f"Congratulations!!! {interaction.user.mention}\nYou won <:KoffeeKoin:939562780363726868> **{'{:,}'.format(win)}**!",
-                color=discord.Color.orange())
+                color=discord.Color.blue())
             embed.set_author(name="Slot machine", icon_url=interaction.user.avatar)
             await interaction.followup.send(embed=embed)
         else:
             remove_bal(interaction.user, amount)
-            embed = discord.Embed(description=random.choice(lose), color=discord.Color.orange())
+            embed = discord.Embed(description=random.choice(lose), color=discord.Color.blue())
             embed.set_author(name="Slot machine", icon_url=interaction.user.avatar)
             await interaction.followup.send(embed=embed, ephemeral=True)
 
@@ -994,12 +996,21 @@ class Economy(commands.Cog):
             f"{top_10[9].id}) ORDER BY bank DESC")
         result = cursor.fetchall()
 
-        embed = discord.Embed(title=f"Top 10 Richest people in {guild}", color=discord.Color.orange())
-        embed.add_field(name="__Member__", value='\n'.join(f"**{i+1})** {user.name}" for i, user in enumerate(top_10)), inline=True)
-        embed.add_field(name="> __Money__", value='\n'.join(f"> {'{:,}'.format(result[i][2])}" for i in range(len(top_10))), inline=True)
+        embed = discord.Embed(title=f"Top 10 Richest people in {guild}", color=discord.Color.blue())
+        embed.add_field(name="Member <:rare_coffee:951551480215789658>", value='\n'.join(f"**{i+1})** {user.name}" for i, user in enumerate(top_10)), inline=True)
+        embed.add_field(name="> Money <:KoffeeKoin:939562780363726868>", value='\n'.join(f"> {'{:,}'.format(result[i][1] + result[i][2])}" for i in range(len(top_10))), inline=True)
         embed.set_thumbnail(url=interaction.guild.icon)
 
         await interaction.followup.send(embed=embed)
+
+
+    # @app_commands.command(name="profile", description="Display your KoffeeBot profile")
+    # @app_commands.describe(member="The user who's profile you wish to view")
+    # async def profile(self, interaction: discord.Interaction, member: discord.Member = None):
+    #     if member is None:
+    #         member = interaction.user
+    #
+    #     name, nick, id, status = str(member), member.display_name, str(member.id), str(member.status).upper()
 
 
     @commands.Cog.listener()
@@ -1014,9 +1025,9 @@ class Economy(commands.Cog):
             open_wallet(user)
             add_bal(user, 25000)
 
-            embed = discord.Embed(title="KoffeeBot Vote Rewards", color=discord.Color.orange())
+            embed = discord.Embed(title="KoffeeBot Vote Rewards", color=discord.Color.blue())
             embed.set_thumbnail(
-                url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+                url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
             embed.add_field(name="Thank you for voting for me :D",
                             value=f"You have received <:KoffeeKoin:939562780363726868>**25,000**")
             await user_object.send(embed=embed)

@@ -88,21 +88,21 @@ async def on_app_command_error(interaction: discord.Interaction, error: discord.
         else:
             timer_format = "seconds"
 
-        embed = discord.Embed(color=discord.Color.orange())
+        embed = discord.Embed(color=discord.Color.blue())
         embed.set_thumbnail(
             url=interaction.user.avatar)
         embed.add_field(name="Cooldown", value=f"You are on cooldown!\nTry again in `{round(timer)} {timer_format}`")
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     elif isinstance(error, app_commands.errors.MissingPermissions):
-        embed = discord.Embed(color=discord.Color.orange())
-        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+        embed = discord.Embed(color=discord.Color.blue())
+        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
         embed.add_field(name="Missing Permissions", value="You don't have the required\npermissions to do that!")
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     elif isinstance(error, app_commands.errors.BotMissingPermissions):
-        embed = discord.Embed(color=discord.Color.orange())
-        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+        embed = discord.Embed(color=discord.Color.blue())
+        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
         embed.add_field(name="Bot Missing Permissions", value="KoffeeBot does not have the required permissions to do this command. Make sure you have enabled permissions for me to do so")
         await interaction.response.send_message(embed=embed)
 
@@ -114,9 +114,9 @@ async def change_status():
 
 @client.tree.command(name="servers", description="Show KoffeeBot server count")
 async def servers(interaction: discord.Interaction):
-    embed = discord.Embed(title="KoffeeBot Server count", color=discord.Color.orange())
+    embed = discord.Embed(title="KoffeeBot Server count", color=discord.Color.blue())
     embed.set_thumbnail(
-        url='https://cdn.discordapp.com/attachments/922598156842172508/923140639556775946/koffee4.png')
+        url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
     embed.add_field(name=f"Currently in {len(client.guilds)} servers", value="Add me to more :D\n"
                          "https://top.gg/bot/901223515242508309?s=0210af7e1c4e5")
     await interaction.response.send_message(embed=embed)
