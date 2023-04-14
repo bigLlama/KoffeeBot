@@ -22,7 +22,10 @@ class moderation(commands.Cog):
                            member="The user you wish to give the role to")
     async def addrole(self, interaction: discord.Interaction, role: discord.Role, member: discord.Member):
         await member.add_roles(role)
-        await interaction.response.send_message(f"Added the {role} role to {member}", ephemeral=True)
+
+        embed = discord.Embed(title="Roles", description=f"Added the {role} role to {member}")
+        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="removerole", description="Remove a role from a user")  # remove role
     @app_commands.checks.has_permissions(manage_roles=True)
@@ -30,7 +33,11 @@ class moderation(commands.Cog):
                            member="The user you wish to remove the role from")
     async def removerole(self, interaction: discord.Interaction, role: discord.Role, member: discord.Member):
         await member.remove_roles(role)
-        await interaction.response.send_message(f"Removed the {role} role from {member}", ephemeral=True)
+
+        embed = discord.Embed(title="Roles", description=f"Removed the {role} role from {member}")
+        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
+
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="inspect", description="Show information about a user")  # inspect a user
     @app_commands.describe(member="The user you wish to inspect (Also works with user's id)")

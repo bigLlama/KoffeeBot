@@ -88,7 +88,6 @@ class games(commands.Cog):
                 embed.add_field(name=f"The outcome is {outcome}",
                                 value="Better luck next time!", inline=False)
             return await interaction.response.send_message(embed=embed)
-        await interaction.response.send_message("That is not a valid option")
 
     @app_commands.command(name="guess_the_number", description="Guess a number between 1 and 10")
     @app_commands.checks.cooldown(1, 3.0, key=lambda i: (i.guild_id, i.user.id))
@@ -98,6 +97,7 @@ class games(commands.Cog):
 
         embed = discord.Embed(description='Im thinking of a number between 1 and 10. You have 3 guesses:',
                             color=discord.Color.blue())
+        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
         await interaction.response.send_message(embed=embed)
 
         def check(m):
@@ -113,13 +113,17 @@ class games(commands.Cog):
                 if guess.content == str(cpu):
                     embed = discord.Embed(description="Congratulations! You've guessed correctly",
                                           color=discord.Color.blue())
+                    embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
                     return await interaction.followup.send(embed=embed)
                 else:
                     chances -= 1
-                    await interaction.followup.send(f"Incorrect! You have {chances} chances left")
+                    embed = discord.Embed(description=f"Incorrect! You have {chances} chances left")
+                    embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
+                    await interaction.followup.send(embed=embed)
 
         embed = discord.Embed(description=f"The number was {cpu}. Better luck next time",
                               color=discord.Color.blue())
+        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
         await interaction.followup.send(embed=embed)
 
     @app_commands.command(name='fight', description="Challenge another user to a 1v1 duel!")
@@ -130,15 +134,21 @@ class games(commands.Cog):
         p1 = 100
         p2 = 100
         done = False
+        yourself = False
+
+        desc = f'{member.mention}, {interaction.user.name} has challenged you to a fight to the death\n' \
+               f'Respond with `accept` or `retreat`'
 
         if member == interaction.user:
+            yourself = True
             app_commands.Cooldown.reset(fight_cd)
-            return await interaction.response.send_message("You can not fight yourself!")
+            desc = "You can not fight yourself!"
 
-        embed = discord.Embed(title='Duel!',
-                              description=f'{member.mention}, {interaction.user.name} has challenged you to a fight to the death\n'
-                                          f'Respond with `accept` or `retreat`',
-                              color=discord.Color.blue())
+        embed = discord.Embed(title='Duel!', description=desc, color=discord.Color.blue())
+        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
+
+        if yourself:
+            return await interaction.response.send_message(embed=embed)
         await interaction.response.send_message(embed=embed)
 
         def check(m):

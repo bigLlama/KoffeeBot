@@ -147,8 +147,7 @@ class commandsInfo(commands.Cog):
                             "discord')",
                 color=discord.Color.blue()
             )
-            embed.set_thumbnail(
-                url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
+            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
             embed.add_field(name=":detective: wanted", value="Shows your wanted picture", inline=True)
             embed.add_field(name=":coffin: rip", value="You died?", inline=True)
             embed.add_field(name=":punch: punch", value="Punch someone!\n", inline=True)
@@ -163,9 +162,6 @@ class commandsInfo(commands.Cog):
             embed.add_field(name=":eyes: blackmail", value="Make sure this person stays quiet",
                             inline=True)
             await interaction.response.send_message(embed=embed)
-
-        else:
-            await interaction.response.send_message("Please enter a valid category")
 
 
 async def setup(bot):
