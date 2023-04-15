@@ -126,23 +126,23 @@ class games(commands.Cog):
         embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
         await interaction.followup.send(embed=embed)
 
-    @app_commands.command(name='fight', description="Challenge another user to a 1v1 duel!")
-    @app_commands.describe(member="The user you wish to fight!")
+    @app_commands.command(name='duel', description="Challenge another user to a 1v1 duel!")
+    @app_commands.describe(member="The user you wish to duel!")
     @app_commands.checks.dynamic_cooldown(fight_cooldown)
-    async def fight(self, interaction: discord.Interaction, member: discord.Member):
+    async def duel(self, interaction: discord.Interaction, member: discord.Member):
 
         p1 = 100
         p2 = 100
         done = False
         yourself = False
 
-        desc = f'{member.mention}, {interaction.user.name} has challenged you to a fight to the death\n' \
+        desc = f'{member.mention}, {interaction.user.name} has challenged you to a duel!\n' \
                f'Respond with `accept` or `retreat`'
 
         if member == interaction.user:
             yourself = True
             app_commands.Cooldown.reset(fight_cd)
-            desc = "You can not fight yourself!"
+            desc = "You can not duel yourself!"
 
         embed = discord.Embed(title='Duel!', description=desc, color=discord.Color.blue())
         embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
@@ -165,7 +165,7 @@ class games(commands.Cog):
             return await interaction.followup.send(embed=embed)
         elif answer.content.lower() == 'accept':
             embed = discord.Embed(
-                description=f'Duel: {interaction.user.name} & {member.name} are fighting to the death',
+                description=f'Duel: {interaction.user.name} & {member.name} are now dueling!',
                 color=discord.Color.blue())
             embed.add_field(name=interaction.user.name, value=f"Health: {p1}", inline=True)
             embed.add_field(name=member.name, value=f"Health: {p2}", inline=True)
@@ -173,7 +173,7 @@ class games(commands.Cog):
 
             while done is False:
                 e = discord.Embed(
-                    description=f'Duel: {interaction.user.name} & {member.name} are fighting to the death',
+                    description=f'Duel: {interaction.user.name} & {member.name} are now dueling!',
                     color=discord.Color.blue())
                 e.add_field(name=interaction.user.name, value=f"Health: {p1}", inline=True)
                 e.add_field(name=member.name, value=f"Health: {p2}", inline=True)
@@ -199,14 +199,14 @@ class games(commands.Cog):
 
                 if p1 == 0:
                     f = discord.Embed(
-                        description=f'{member.mention} has defeated {interaction.user.mention} and won the fight!',
+                        description=f'{member.mention} has defeated {interaction.user.mention} and won the duel!',
                         color=discord.Color.blue())
                     f.add_field(name=interaction.user.name, value=f"Health: 0", inline=True)
                     f.add_field(name=member.name, value=f"Health: {p2}", inline=True)
                     return await msg.edit(embed=f)
                 elif p2 == 0:
                     f = discord.Embed(
-                        description=f'{interaction.user.mention} has defeated {member.mention} and won the fight!',
+                        description=f'{interaction.user.mention} has defeated {member.mention} and won the duel!',
                         color=discord.Color.blue())
                     f.add_field(name=interaction.user.name, value=f"Health: {p1}", inline=True)
                     f.add_field(name=member.name, value=f"Health: 0", inline=True)

@@ -82,7 +82,6 @@ class commandsInfo(commands.Cog):
             embed.add_field(name=":rofl: roast", value="Roasts someone", inline=True)
             embed.add_field(name=":eyes: simp", value="Are you a simp?\n", inline=True)
             embed.add_field(name=":brain: dumb", value="Checks how stupid someone is", inline=True)
-            embed.add_field(name=":rainbow_flag: gay", value="How gay are you really?\n", inline=True)
             embed.add_field(name=":smile: laugh", value="KoffeeBot will awkwardly laugh", inline=True)
             embed.add_field(name=":roll_of_paper: meme", value="Enjoy some quality memes!", inline=True)
             embed.add_field(name="⭕ o", value="Replace all vowels with the letter 'o'", inline=True)

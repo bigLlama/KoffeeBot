@@ -122,21 +122,6 @@ class fun(commands.Cog):
         embed.add_field(name=f":8ball: Question: {question}", value=f":8ball: Answer: {random.choice(responses)}")
         await interaction.response.send_message(embed=embed)
 
-    @app_commands.command(name="homo", description="How gay are you?")  # gay probability
-    @app_commands.describe(person="The person you wish to target")
-    async def homo(self, interaction: discord.Interaction, person: discord.Member = None):
-        if person is None:
-            person = interaction.user
-
-        embed = discord.Embed(
-            title="Gay rater",
-            color=discord.Color.blue())
-        embed.set_thumbnail(
-            url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
-
-        embed.add_field(name=f"{person.name}", value="You are " + str(random.choices(range(1, 101))) + "% gay! :gay_pride_flag:")
-        await interaction.response.send_message(embed=embed)
-
     @app_commands.command(name="simp", description="Check how much of a SIMP you are")  # simp probability
     @app_commands.describe(person="The person you wish to target")
     async def simp(self, interaction: discord.Interaction, person: discord.Member = None):
