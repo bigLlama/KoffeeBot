@@ -13,33 +13,11 @@ intents = discord.Intents.all()
 intents.members = True
 client = commands.Bot(command_prefix=['!'], intents=intents, case_insensitive=True)
 client.remove_command('help')
-status = cycle(["kof help",
-                "with your feelings",
-                "Phasmophobia 4",
-                "Fantasy Tower",
-                "Dead by nightlight",
-                "Rainbow Seven Siege",
-                "Fortnite 2",
-                "War Lightning",
-                "Genshin Impact 2.0",
-                "Destiny 3",
-                "Tower of Fantasy 2",
-                "Little Foot",
-                "League of Legends 2",
-                "The Sims 5",
-                "Far Cry 9",
-                "Brawlhalla 2",
-                "Overwatch 3",
-                "Among You",
-                "Minecraft 2",
-                "Rocket League 2",
-                "Rust 4",
-                "Borderlands 5",
-                "The Witcher 6",
-                "GTA VII",
-                "Elden Ring 3",
-                "Cyberpunk 420",
-                "COD BO 5"])  # Bot status games
+status = cycle(["/help",
+                "/vote",
+                "/support",
+                "/invite",
+                "/servers"])  # Bot status list
 
 
 @client.event  # Bot is ready
