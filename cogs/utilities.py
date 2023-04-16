@@ -1,8 +1,11 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
+from discord.app_commands import Choice
 from discord.ext.commands import has_permissions
 import random
+import asyncio
+import datetime
 
 
 class utilities(commands.Cog):
@@ -91,6 +94,80 @@ class utilities(commands.Cog):
                         value="https://top.gg/bot/901223515242508309?s=0210af7e1c4e5",
                         inline=False)
         await interaction.response.send_message(embed=embed)
+
+    @app_commands.command(name="giveaway", description="Start a giveaway in your server")
+    @app_commands.choices(duration=[
+        Choice(name="Seconds", value="seconds"),
+        Choice(name="Minutes", value="minutes"),
+        Choice(name="Hours", value="hours"),
+        Choice(name="Days", value="days")])
+    async def giveaway(self, interaction: discord.Interaction, channel: discord.TextChannel, prize: str,
+                       duration: str, amount: int):
+
+        if amount <= 0:
+            await interaction.response.send_message("Invalid duration. Please enter a positive number.")
+            return
+
+        duration_dict = {
+            "seconds": datetime.timedelta(seconds=amount),
+            "minutes": datetime.timedelta(minutes=amount),
+            "hours": datetime.timedelta(hours=amount),
+            "days": datetime.timedelta(days=amount)
+        }
+
+        embed = discord.Embed(title="Giveaway",
+                              description=f"You have started a giveaway in {channel.mention}",
+                              color=discord.Color.blue())
+        await interaction.response.send_message(embed=embed)
+
+        embed = discord.Embed(title="GIVEAWAY",
+                              description=f"**Prize:** `{prize}`\n**Duration:** `{amount} {duration}`",
+                              color=discord.Color.blue())
+        embed.set_thumbnail(
+            url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
+        embed.set_footer(text="React below to enter the giveaway!")
+        message = await channel.send(embed=embed)
+        await message.add_reaction("🎉")
+
+        end_time = datetime.datetime.utcnow() + duration_dict[duration]
+
+        while datetime.datetime.utcnow() < end_time:
+            time_left = end_time - datetime.datetime.utcnow()
+            duration_str = str(time_left).split(".")[0]
+            embed = discord.Embed(title="GIVEAWAY",
+                                  description=f"**Prize:** `{prize}`\n**Duration:** `{duration_str}`",
+                                  color=discord.Color.blue())
+            embed.set_thumbnail(
+                url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
+            embed.set_footer(text="React below to enter the giveaway!")
+            await message.edit(embed=embed)
+            await asyncio.sleep(1)
+
+        # Get all users who reacted to the message
+        users = []
+        message = await channel.fetch_message(message.id)
+        for reaction in message.reactions:
+            async for user in reaction.users():
+                if user not in reaction_users and not user.bot:
+                    reaction_users.append(user)
+
+
+        # Pick a random winner from the list of users who reacted to the message
+        winner = random.choice(users)
+        print(winner)
+        embed = discord.Embed(title="GIVEAWAY",
+                              description=f"**Prize:** `{prize}`\n**Winner:** {winner.mention}",
+                              color=discord.Color.blue())
+        embed.set_thumbnail(
+            url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
+        await interaction.followup.send(embed=embed)
+
+
+
+
+
+
+
 
 
 async def setup(bot):

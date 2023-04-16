@@ -67,15 +67,6 @@ async def main():
         await client.start(TOKEN)
 
 
-@client.event  # on guild join
-async def on_guild_join(guild):
-    general = find(lambda x: x.name == 'general',  guild.text_channels)
-    if general and general.permissions_for(guild.me).send_messages:
-        embed = discord.Embed(title="KoffeeBot", description="Hi, I'm KofeeBot. Use **/help** to get started!")
-        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
-        await general.send(embed)
-
-
 @client.tree.error
 async def on_app_command_error(interaction: discord.Interaction, error: discord.app_commands.AppCommandError) -> None:
     if isinstance(error, app_commands.errors.CommandOnCooldown):
