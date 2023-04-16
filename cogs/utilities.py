@@ -120,8 +120,8 @@ class utilities(commands.Cog):
                               color=discord.Color.blue())
         await interaction.response.send_message(embed=embed)
 
-        embed = discord.Embed(title="GIVEAWAY",
-                              description=f"**Prize:** `{prize}`\n**Duration:** `{amount} {duration}`",
+        embed = discord.Embed(title="🎉 GIVEAWAY 🎉",
+                              description=f"**Prize:** `{prize}`\n**Time Left:** `{amount} {duration}`",
                               color=discord.Color.blue())
         embed.set_thumbnail(
             url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
@@ -134,8 +134,8 @@ class utilities(commands.Cog):
         while datetime.datetime.utcnow() < end_time:
             time_left = end_time - datetime.datetime.utcnow()
             duration_str = str(time_left).split(".")[0]
-            embed = discord.Embed(title="GIVEAWAY",
-                                  description=f"**Prize:** `{prize}`\n**Duration:** `{duration_str}`",
+            embed = discord.Embed(title="🎉 GIVEAWAY 🎉",
+                                  description=f"**Prize:** `{prize}`\n**Time Left:** `{duration_str}`",
                                   color=discord.Color.blue())
             embed.set_thumbnail(
                 url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
@@ -148,26 +148,19 @@ class utilities(commands.Cog):
         message = await channel.fetch_message(message.id)
         for reaction in message.reactions:
             async for user in reaction.users():
-                if user not in reaction_users and not user.bot:
-                    reaction_users.append(user)
-
+                if user not in users and not user.bot:
+                    users.append(user)
 
         # Pick a random winner from the list of users who reacted to the message
         winner = random.choice(users)
-        print(winner)
-        embed = discord.Embed(title="GIVEAWAY",
-                              description=f"**Prize:** `{prize}`\n**Winner:** {winner.mention}",
+
+        embed = discord.Embed(title="🎉 GIVEAWAY WINNER 🎉",
+                              description=f"**Prize:** `{prize}`\n**Time Left:** `{duration_str}`\n\n"
+                                          f"Congratulations {winner.mention}\nYou have won the giveaway for `{prize}`",
                               color=discord.Color.blue())
-        embed.set_thumbnail(
-            url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
-        await interaction.followup.send(embed=embed)
-
-
-
-
-
-
-
+        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
+        embed.set_footer(text="This giveaway has ended.")
+        await message.edit(embed=embed)
 
 
 async def setup(bot):
