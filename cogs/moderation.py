@@ -1,7 +1,40 @@
 import discord
+import sqlite3
+from datetime import datetime
 from discord.ext import commands
 from discord import app_commands
 from discord.app_commands import Choice
+
+
+def store_notes(user: discord.Member, user_note: str, server_id: int):
+    db = sqlite3.connect('kof_db.sqlite')
+    cursor = db.cursor()
+    cursor.execute(f"SELECT * FROM notes WHERE id = {user.id} AND server_id = {server_id}")
+    result = cursor.fetchone()
+
+    current_date = datetime.today().strftime('%d %b %Y at %H:%M %p')
+
+    if result:
+        return None
+    else:
+        sql = "INSERT INTO notes(id, note, date, server_id) VALUES(?,?,?,?)"
+        val = (user.id, user_note, current_date, server_id)
+
+    cursor.execute(sql, val)
+    db.commit()
+    cursor.close()
+    db.close()
+
+    return f"Created note for {user.name}"
+
+
+def get_notes(user: discord.Member, server_id):
+    db = sqlite3.connect('kof_db.sqlite')
+    cursor = db.cursor()
+    cursor.execute(f"SELECT * FROM notes WHERE id = {user.id} AND server_id = {server_id}")
+    result = cursor.fetchone()
+
+    return result
 
 
 class moderation(commands.Cog):
@@ -70,17 +103,81 @@ class moderation(commands.Cog):
 
         embed = discord.Embed(description=member.mention, color=discord.Color.blue())
         embed.set_author(name=f"{member}", icon_url=member.avatar)
-        embed.add_field(name="Server Join Date:", value=joined_date, inline=True)
-        embed.add_field(name="> Account Creation Date:", value=f"> {create_date}", inline=True)
+        embed.add_field(name="Server Join Date:", value=f"`{joined_date}`", inline=True)
+        embed.add_field(name="> Account Creation Date:", value=f"> `{create_date}`", inline=True)
         if len(mention) > 0:
             embed.add_field(name=f"Roles: ({len(mention)})", value=' '.join(f"{role}" for role in mention),
                             inline=False)
         if len(perms) > 0:
             embed.add_field(name="Key Permissions:", value=', '.join(f"{perm}" for perm in perms), inline=False)
         embed.set_thumbnail(url=member.avatar)
-        embed.set_footer(text=f"ID: {member.id}", )
+        embed.set_footer(text=f"ID: {member.id}")
 
         await interaction.response.send_message(embed=embed)
+
+
+    @app_commands.command(name="addnote", description="Add notes for a server member")
+    @app_commands.checks.has_permissions(moderate_members=True)
+    @app_commands.describe(user="The member you wish to create a note for",
+                           note="The note you wish to add to this member")
+    async def addnote(self, interaction: discord.Interaction, user: discord.Member, note: str):
+        guild_id = interaction.guild.id
+        msg = store_notes(user, note, guild_id)
+
+        if not msg:
+            embed = discord.Embed(description=f"This user already has a saved note\n"
+                                    f"To edit their existing note use /editnote",
+                                  color=discord.Color.blue())
+            return await interaction.response.send_message(embed=embed)
+
+        await interaction.response.send_message(msg)
+
+    @app_commands.command(name="notes", description="View notes for a server member")
+    @app_commands.checks.has_permissions(moderate_members=True)
+    @app_commands.describe(user="The user who's notes you wish to view")
+    async def notes(self, interaction: discord.Interaction, user: discord.Member):
+        guild_id = interaction.guild.id
+        note = get_notes(user, guild_id)
+
+        if not note:
+            embed = discord.Embed(description="There are no notes for this user", color=discord.Color.blue())
+            return await interaction.response.send_message(embed=embed)
+
+        embed = discord.Embed(description=user.mention, color=discord.Color.blue())
+        embed.set_author(name=user, icon_url=user.avatar)
+        embed.add_field(name="Note added:", value=f"`{note[2]}`", inline=False)
+        embed.add_field(name="Notes:", value=f"{note[1]}", inline=False)
+        embed.set_thumbnail(url=user.avatar)
+        embed.set_footer(text=f"ID: {user.id}")
+
+        await interaction.response.send_message(embed=embed)
+
+
+    @app_commands.command(name="editnote", description="Edit an existing member's notes")
+    @app_commands.checks.has_permissions(moderate_members=True)
+    @app_commands.describe(user="The member who's note you wish to edit",
+                           note="The new note you wish to add")
+    async def editnote(self, interaction: discord.Interaction, user: discord.Member, note: str):
+        db = sqlite3.connect('kof_db.sqlite')
+        cursor = db.cursor()
+        cursor.execute(f"SELECT * FROM notes WHERE id = {user.id}")
+        old_note = cursor.fetchone()
+
+        current_date = datetime.today().strftime('%d %b %Y at %H:%M %p')
+        cursor.execute(f"UPDATE notes SET note = '{note}', date = '{current_date}' WHERE id = {user.id}")
+        db.commit()
+
+        embed = discord.Embed(description=f"Updated notes for {user.mention}\n\n"
+                                          f"**From:**\n{old_note[1]}\n\n**To:**\n{note}",
+                              color=discord.Color.blue())
+        embed.set_author(name=user, icon_url=user.avatar)
+        embed.set_thumbnail(url=user.avatar)
+
+        await interaction.response.send_message(embed=embed)
+
+        cursor.close()
+        db.close()
+
 
 
 async def setup(bot):
