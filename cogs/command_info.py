@@ -45,9 +45,12 @@ class commandsInfo(commands.Cog):
                             "discord')",
                 color=discord.Color.blue())
             embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
-            embed.add_field(name=":wastebasket: clear", value="Deletes a specified amount of text messages", inline=True)
+            embed.add_field(name=":wastebasket: clear", value="Deletes a specified amount of chat messages", inline=True)
             embed.add_field(name=":tickets: giverole", value="Give someone a role from your server", inline=True)
             embed.add_field(name=":carpentry_saw: removerole", value="Remove a role from someone", inline=True)
+            embed.add_field(name="📋 addnote", value="Create notes about a server member", inline=True)
+            embed.add_field(name="🗃️ notes", value="View notes about a server member", inline=True)
+            embed.add_field(name="📝 editnote", value="Edit an existing member's notes", inline=True)
             embed.add_field(name=":mag_right: inspect", value="Inspect a user", inline=True)
             await interaction.response.send_message(embed=embed)
 
