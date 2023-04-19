@@ -160,9 +160,11 @@ class games(commands.Cog):
             app_commands.Cooldown.reset(fight_cd)
             return await interaction.followup.send("You did not respond in time. Be quicker next time!")
 
+
         if answer.content.lower() == 'retreat':
             embed = discord.Embed(description=f'{interaction.user.mention}! {member.name} has declined your challenge', color=discord.Color.blue())
             return await interaction.followup.send(embed=embed)
+
         elif answer.content.lower() == 'accept':
             embed = discord.Embed(
                 description=f'Duel: {interaction.user.name} & {member.name} are now dueling!',

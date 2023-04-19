@@ -159,6 +159,7 @@ def add_item(user: discord.Member, amount: int, item: str, i: int):
     cursor.execute(f"SELECT * FROM ingredients INNER JOIN recipes USING (member_id) WHERE member_id = {user.id}")
     result = cursor.fetchone()
 
+
     if item in recipeList:
         sql = f"UPDATE recipes SET {item} = ? WHERE member_id = ?"
     else:
@@ -294,11 +295,13 @@ class Economy(commands.Cog):
         big_amount = random.randrange(800, 1100)
 
         if possibility == 3:
-            return await interaction.response.send_message(random.choice(none))
+            await interaction.response.send_message(random.choice(none))
+            return
         if possibility == 6:
             add_bal(interaction.user, big_amount)
-            return await interaction.response.send_message(f"Wow! You received a "
+            await interaction.response.send_message(f"Wow! You received a "
                 f"generous donation of <:KoffeeKoin:939562780363726868> **{'{:,}'.format(big_amount)}**")
+            return
 
         outcomes = [
             f"You got <:KoffeeKoin:939562780363726868> **{'{:,}'.format(amount)}** from a nice old lady",
@@ -321,10 +324,10 @@ class Economy(commands.Cog):
         open_wallet(interaction.user)
         open_wallet(member)
 
-        if amount < 1:
-            embed = discord.Embed(title="Negative values", description="You can't give someone a negative amount!")
-            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
-            return await interaction.response.send_message(embed=embed)
+        if amount < 0:
+            embed = discord.Embed(title="Negative values", description="You can not use negative values!")
+            await interaction.response.send_message(embed=embed)
+            return
 
         if item is not None:  # item handling
             for i in range(len(all_items)):
@@ -340,7 +343,8 @@ class Economy(commands.Cog):
             if not check_bal_greater_than(interaction.user, amount):
                 embed = discord.Embed(title="Incorrect Amount", description="You can not give more than you have")
                 embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
-                return await interaction.response.send_message(embed=embed)
+                await interaction.response.send_message(embed=embed)
+                return
 
             remove_bal(interaction.user, amount)
             add_bal(member, amount)
@@ -361,26 +365,27 @@ class Economy(commands.Cog):
 
         if member == interaction.user:
             app_commands.Cooldown.reset(steal_cd)
-            embed = discord.Embed(title="Member Error", description="You cannot steal from yourself!")
-            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
+            embed = discord.Embed(title="Member Error", description="You cannot steal from yourself!", color=discord.Color.blue())
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
 
         if result[1] < 500:
             app_commands.Cooldown.reset(steal_cd)
             embed = discord.Embed(title="Money Requirements",
-                                  description="You need at least <:KoffeeKoin:939562780363726868> **500** in your wallet to rob someone")
-            embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
+                                  description="You need at least <:KoffeeKoin:939562780363726868> **500** in your wallet to rob someone",
+                                  color=discord.Color.blue())
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
 
         cursor.execute(f"SELECT * from wallets WHERE member_id = {member.id}")
         result = cursor.fetchone()
-        steal_money = random.choice(range(1, result[1]))
 
-        if result[1] < 500 or result[1] == 0:
+        if result[1] < 500:
             app_commands.Cooldown.reset(steal_cd)
-            return await interaction.response.send_message(
-                "Your target needs to have at least <:KoffeeKoin:939562780363726868> **500** in their wallet for you to rob "
-                "them", ephemeral=True)
+            await interaction.response.send_message("Your target needs to have at least <:KoffeeKoin:939562780363726868> **500** in their wallet for you to rob them", ephemeral=True)
+            return
+
+        steal_money = random.choice(range(1, result[1]))
 
         if steal_chance == 1:
             remove_bal(member, steal_money)
@@ -408,7 +413,8 @@ class Economy(commands.Cog):
         if result[1] == 0:
             embed = discord.Embed(title="Out of Money", description="You don't have any money to deposit")
             embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
 
         done = False
         amount = str(amount)
@@ -425,17 +431,21 @@ class Economy(commands.Cog):
                 assert amount > 0
 
             except AssertionError:
-                embed = discord.Embed(title="Negative Amount", description="You can not deposit a negative amount")
-                embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
-                return await interaction.response.send_message(embed=embed, ephemeral=True)
+                embed = discord.Embed(title="Negative Amount",
+                                      description="You can not deposit a negative amount",
+                                      color=discord.Color.blue())
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+                return
             except ValueError:
                 embed = discord.Embed(title="Value Error", description="Maybe try typing an actual number!")
                 embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
-                return await interaction.response.send_message(embed=embed, ephemeral=True)
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+                return
 
             if result[1] < amount:
-                return await interaction.response.send_message(
+                await interaction.response.send_message(
                     f"You cannot deposit more than <:KoffeeKoin:939562780363726868> **{'{:,}'.format(result[1])}**")
+                return
 
             sql = "UPDATE wallets SET bank = ? WHERE member_id = ?"
             val = (result[2] + amount, interaction.user.id)
@@ -479,11 +489,18 @@ class Economy(commands.Cog):
         cursor.execute(f"SELECT * FROM wallets WHERE member_id = {interaction.user.id}")
         result = cursor.fetchone()
 
+        if int(amount) < 0:
+            embed = discord.Embed(title="Negative values", description="You can not use negative values!")
+            await interaction.response.send_message(embed=embed)
+            return
+
         amount = str(amount)
         if result[2] == 0:
             embed = discord.Embed(title="Out of Money", description="You dont have any money in your bank :|")
             embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
+
         done = False
 
         if str(amount) == "max" or str(amount) == "all":
@@ -504,11 +521,13 @@ class Economy(commands.Cog):
             except AssertionError:
                 embed = discord.Embed(title="Negative Amount", description="You can not deposit a negative amount")
                 embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
-                return await interaction.response.send_message(embed=embed, ephemeral=True)
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+                return
             except ValueError:
                 embed = discord.Embed(title="Value Error", description="Maybe try typing an actual number!")
                 embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
-                return await interaction.response.send_message(embed=embed, ephemeral=True)
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+                return
 
             if int(amount) > result[2]:
                 desc = "You cannot withdraw an amount bigger than your bank balance :|"
@@ -563,6 +582,10 @@ class Economy(commands.Cog):
 
     @app_commands.command(name='craft', description="Craft an item")
     @app_commands.describe(item="The item you wish to craft", amount="The amount of items you wish to craft")
+    @app_commands.choices(item=[
+        Choice(name="Common Coffee", value="ccoffee"),
+        Choice(name="Rare Coffee", value="rcoffee"),
+        Choice(name="Tea", value="tea")])
     @app_commands.checks.cooldown(1, 3.0, key=lambda i: (i.guild_id, i.user.id))
     async def craft(self, interaction: discord.Interaction, item: str, amount: int = 1):
         user = interaction.user
@@ -572,6 +595,11 @@ class Economy(commands.Cog):
         result = cursor.fetchone()
 
         hasEnough = []
+
+        if amount < 0:
+            embed = discord.Embed(title="Negative values", description="You can not use negative values!")
+            await interaction.response.send_message(embed=embed)
+            return
 
         embed = discord.Embed(title="Insuffiecient items", description="You do not have enough items to craft this item")
         embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
@@ -681,6 +709,13 @@ class Economy(commands.Cog):
         Choice(name="Golden Spoon", value="gspoon"),
         Choice(name="Tea Bag", value="teabag")])
     async def buy(self, interaction: discord.Interaction, item: str, amount: int = 1):
+
+        if amount <= 0:
+            embed = discord.Embed(title="Invalid Amount", description="Please enter a positive number for the amount.",
+                                  color=discord.Color.blue())
+            await interaction.response.send_message(embed=embed)
+            return
+
         user = interaction.user
         db = sqlite3.connect('kof_db.sqlite')
         cursor = db.cursor()
@@ -699,7 +734,8 @@ class Economy(commands.Cog):
                     error = True
 
                 embed = discord.Embed(title=title, description=desc, color=discord.Color.blue())
-                embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
+                embed.set_thumbnail(
+                    url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
                 await interaction.response.send_message(embed=embed)
 
                 if not error:
@@ -760,12 +796,17 @@ class Economy(commands.Cog):
         result = cursor.fetchone()
         all_items = itemID + recipeList
 
+        print(result)
+
         embed = discord.Embed(title=f"{user.name}'s inventory", color=discord.Color.blue())
         embed.set_thumbnail(url=user.avatar)
         inven = []
+
         for i in range(len(all_items)):
             if result[i + 1] != 0:
                 inven.append(i)
+
+        print(inven)
         for i in inven:
             embed.add_field(name=f"{itemlist[i]}  {result[i + 1]}", value=f"ID: `{all_items[i]}`",
                             inline=False)
@@ -775,9 +816,9 @@ class Economy(commands.Cog):
     @app_commands.command(name='joblist', description="Shows all current available jobs")  # job list
     async def joblist(self, interaction: discord.Interaction):
         embed = discord.Embed(title="Current available jobs",
-                              description="`/job to select a job\n"
-                                          "`/work` to start working\n"
-                                          "`/resign` to quit your current job",
+                              description="```/job to select a job\n"
+                                          "/work to start working\n"
+                                          "/resign to quit your current job```",
                               color=discord.Color.blue())
 
         embed.set_thumbnail(url=interaction.guild.icon)
@@ -822,17 +863,18 @@ class Economy(commands.Cog):
         for i, jobtype in enumerate(joblist):
             if job == jobtype:
                 if result[3] != 'unemployed':
-                    return await interaction.response.send_message('You already have a job!')
+                    await interaction.response.send_message('You already have a job!')
+                    return
 
                 if result[result_iter[i]] < 1:
-                    return await interaction.response.send_message(
-                        f"You need to craft at least 1 {needed_item[i]} to qualify for this job")
+                    await interaction.response.send_message(f"You need to craft at least 1 {needed_item[i]} to qualify for this job")
+                    return
                 else:
                     update_job(interaction.user, job)
                     embed = discord.Embed(title="Jobs", description=f"Your jobtitle is now: **{jobtype}**. Use `/work` to start working")
                     embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
-                    return await interaction.response.send_message(embed=embed)
-
+                    await interaction.response.send_message(embed=embed)
+                    return
 
     @app_commands.command(name='work', description="Start working at your job")  # work command
     @app_commands.checks.dynamic_cooldown(work_cooldown)
@@ -965,14 +1007,15 @@ class Economy(commands.Cog):
 
         if amount < 500:
             app_commands.Cooldown.reset(slots_cd)
-            return await interaction.response.send_message(
-                "You need at least <:KoffeeKoin:939562780363726868> **500** in your wallet to use the slot machine", ephemeral=True)
+            await interaction.response.send_message("You need at least "
+            "<:KoffeeKoin:939562780363726868> **500** in your wallet to use the slot machine", ephemeral=True)
+            return
 
         result = check_bal_greater_than(user=interaction.user, amount=amount)
         if result is False:
             app_commands.Cooldown.reset(slots_cd)
-            return await interaction.response.send_message(
-                "Your amount cannot be greater than your wallet :|", ephemeral=True)
+            await interaction.response.send_message("Your amount cannot be greater than your wallet :|", ephemeral=True)
+            return
 
         em1 = discord.Embed(title="=-=-=-=-=-=\n"
                                   ":red_square: :red_square: :red_square: :round_pushpin:\n"
@@ -1031,8 +1074,9 @@ class Economy(commands.Cog):
                 break
 
         if len(top_10) < 10:
-            return await interaction.response.send_message(
-                "At least 10 people in this server need a KoffeeBot account/balance\nYou can open an account by using `/balance`")
+            await interaction.response.send_message("At least 10 people in this server need a "
+                "KoffeeBot account/balance\nYou can open an account by using `/balance`")
+            return
 
         cursor.execute(
             f"SELECT * FROM wallets WHERE member_id IN "

@@ -96,6 +96,8 @@ class utilities(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="giveaway", description="Start a giveaway in your server")
+    @app_commands.describe(channel="The channel you wish to host the giveaway in", prize="The prize you wish to give away",
+                           duration="Choose a duration format", amount="The amount of time")
     @app_commands.choices(duration=[
         Choice(name="Seconds", value="seconds"),
         Choice(name="Minutes", value="minutes"),

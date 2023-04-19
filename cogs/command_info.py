@@ -69,6 +69,7 @@ class commandsInfo(commands.Cog):
             embed.add_field(name=":bellhop: invite", value="Add KoffeeBot to other servers", inline=True)
             embed.add_field(name=':hourglass: support', value="Have any problems with KoffeeBot?")
             embed.add_field(name=':chart_with_upwards_trend: servers', value="Check how many servers are using KoffeeBot")
+            embed.add_field(name='🎉 giveaway', value="Start a giveaway in your server")
             await interaction.response.send_message(embed=embed)
 
         elif category.lower() == "fun":
@@ -137,7 +138,7 @@ class commandsInfo(commands.Cog):
             embed.add_field(name='🍽️ recipes', value="Shows all craftable items")
             embed.add_field(name='⛏ craft', value="Craft an item")
             embed.add_field(name=':slot_machine: slots', value="Risk it all with the slot machine!")
-            embed.add_field(name='💎 rich', value="View the richest KoffeeBot users in your discord")
+            embed.add_field(name='💎 leaderboard', value="View the richest KoffeeBot users in your discord")
 
             await interaction.response.send_message(embed=embed)
 
