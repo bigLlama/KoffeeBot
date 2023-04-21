@@ -23,16 +23,13 @@ class utilities(commands.Cog):
                "Sup",
                f"Hi {interaction.user.name}"]
         if interaction.user.id == 465839240777826324:  # Me
-            await interaction.response.send_message('Good to see you master')
+            await interaction.response.send_message('Good to see you master.')
             return
         elif interaction.user.id == 660749269921169410:  # sheepy
-            await interaction.response.send_message('Hello Sheep')
+            await interaction.response.send_message('Hello Sheep.')
             return
         elif interaction.user.id == 324570286068334592:  # janlu
             await interaction.response.send_message('My lord!')
-            return
-        elif interaction.user.id == 190877518029520896:  # vir juan van janlu
-            await interaction.response.send_message('jys kak in leugue of legends #getgoodfam')
             return
         await interaction.response.send_message(random.choice(hey))
 
