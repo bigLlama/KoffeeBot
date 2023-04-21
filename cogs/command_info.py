@@ -23,7 +23,8 @@ class commandsInfo(commands.Cog):
                 title="A list of all my current commands/features",
                 description="Descriptions are provided below each command\n" 
                             "[Support Server](https://discord.gg/fa3j7fpbA6/ 'Takes you to the official KoffeeBot "
-                            "discord')",
+                            "discord')\n"
+                            "[Website](website//index.html/ 'View the list of KoffeeBot commands')",
                 color=discord.Color.blue()
             )
             embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
@@ -33,7 +34,6 @@ class commandsInfo(commands.Cog):
             embed.add_field(name="/help moderation 🛡️", value="Displays all moderation commands",inline=True)
             embed.add_field(name="/help images 🧩", value="Displays all image manipulation commands",inline=True)
             embed.add_field(name="/help misc 📌", value="Displays all miscellaneous commands ", inline=True)
-
             await interaction.response.send_message(embed=embed)
             return
 
