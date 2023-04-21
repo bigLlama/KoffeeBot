@@ -20,11 +20,11 @@ class commandsInfo(commands.Cog):
     async def help(self, interaction: discord.Interaction, category: str = None):
         if category is None:
             embed = discord.Embed(
-                title="A list of all my current commands/features",
+                title="Help",
                 description="Descriptions are provided below each command\n" 
                             "[Support Server](https://discord.gg/fa3j7fpbA6/ 'Takes you to the official KoffeeBot "
                             "discord')\n"
-                            "[Website](website//index.html/ 'View the list of KoffeeBot commands')",
+                            "[Website](http://koffeebot.epizy.com/ 'View the list of KoffeeBot commands')",
                 color=discord.Color.blue()
             )
             embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
@@ -42,7 +42,8 @@ class commandsInfo(commands.Cog):
                 title="Moderation",
                 description="Descriptions are provided below each command\n"
                             "[Support Server](https://discord.gg/fa3j7fpbA6/ 'Takes you to the official KoffeeBot "
-                            "discord')",
+                            "discord')\n"
+                            "[Website](http://koffeebot.epizy.com/ 'View the list of KoffeeBot commands')",
                 color=discord.Color.blue())
             embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
             embed.add_field(name="/clear 🗑", value="Deletes a specified amount of chat messages", inline=True)
@@ -59,7 +60,8 @@ class commandsInfo(commands.Cog):
                 title="Miscellaneous",
                 description="Descriptions are provided below each command\n"
                             "[Support Server](https://discord.gg/fa3j7fpbA6/ 'Takes you to the official KoffeeBot "
-                            "discord')",
+                            "discord')\n"
+                            "[Website](http://koffeebot.epizy.com/ 'View the list of KoffeeBot commands')",
                 color=discord.Color.blue()
             )
             embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
@@ -77,7 +79,8 @@ class commandsInfo(commands.Cog):
                 title="Fun",
                 description="Descriptions are provided below each command\n"
                             "[Support Server](https://discord.gg/fa3j7fpbA6/ 'Takes you to the official KoffeeBot "
-                            "discord')",
+                            "discord')\n"
+                            "[Website](http://koffeebot.epizy.com/ 'View the list of KoffeeBot commands')",
                 color=discord.Color.blue()
             )
             embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
@@ -98,7 +101,8 @@ class commandsInfo(commands.Cog):
                 title="Games",
                 description="Descriptions are provided below each command\n"
                             "[Support Server](https://discord.gg/fa3j7fpbA6/ 'Takes you to the official KoffeeBot "
-                            "discord')",
+                            "discord')\n"
+                            "[Website](http://koffeebot.epizy.com/ 'View the list of KoffeeBot commands')",
                 color=discord.Color.blue()
             )
             embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
@@ -113,7 +117,8 @@ class commandsInfo(commands.Cog):
                 title="Economy",
                 description="Descriptions are provided below each command\n"
                             "[Support Server](https://discord.gg/fa3j7fpbA6/ 'Takes you to the official KoffeeBot "
-                            "discord')",
+                            "discord')\n"
+                            "[Website](http://koffeebot.epizy.com/ 'View the list of KoffeeBot commands')",
                 color=discord.Color.blue()
             )
             embed.set_thumbnail(
@@ -147,7 +152,8 @@ class commandsInfo(commands.Cog):
                 title="Image Manipulation",
                 description="Descriptions are provided below each command\n"
                             "[Support Server](https://discord.gg/fa3j7fpbA6/ 'Takes you to the official KoffeeBot "
-                            "discord')",
+                            "discord')\n"
+                            "[Website](http://koffeebot.epizy.com/ 'View the list of KoffeeBot commands')",
                 color=discord.Color.blue())
 
             embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
