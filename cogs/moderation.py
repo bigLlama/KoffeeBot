@@ -178,6 +178,30 @@ class moderation(commands.Cog):
         cursor.close()
         db.close()
 
+    @app_commands.command(name="serverstats", description="View your servser statistics!")
+    @app_commands.checks.has_permissions(moderate_members=True)
+    async def serverstats(self, interaction: discord.Interaction):
+        guild = interaction.guild
+        created = guild.created_at.strftime("%d/%m/%Y %H:%M:%S")
+        total_members = guild.member_count
+        total_channels = len(guild.channels)
+
+        online_members = len([m for m in guild.members if m.status != discord.Status.offline])
+        offline_members = guild.member_count - online_members
+
+
+        embed = discord.Embed(title=f"Stats for {guild}",
+                              color=discord.Color.blue())
+        embed.add_field(name="Server Creation Date", value=f"`{created}`", inline=False)
+        embed.add_field(name="Server Members", value=f"Online members: `{online_members}`\n"
+                                          f"Offline members: `{offline_members}`\n"
+                                          f"Total members: `{total_members}`\n\n"
+                                          f"Channels: `{total_channels}`", inline=False)
+        embed.set_thumbnail(url=guild.icon)
+        embed.set_footer(text=f"Guild ID: {guild.id}")
+
+        await interaction.response.send_message(embed=embed)
+
 
 
 async def setup(bot):

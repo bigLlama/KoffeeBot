@@ -22,7 +22,7 @@ status = cycle(["/help",
 
 
 load_dotenv()
-TOKEN = environ["TOKEN"]
+TOKEN = "MTAzNTE0MTA4MTQ4Mzk3MjY4OQ.GsXWLD.RLn9Ar2KkF_CjAB8ghwk_cdMAnud8ulPh-KPcU"
 
 
 @client.event  # Bot is ready

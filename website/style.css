@@ -1,77 +1,240 @@
+/* Global styles */
 body {
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	background-color: #f4f4f4;
+	color: #444;
+	line-height: 1.6;
+	margin: 0;
+}
+
+.commands-body {
   background-color: #275071;
   font-family: Arial, sans-serif;
 }
 
-.header {
-  display: flexbox;
-  background-color: #112d48;
+.container {
+	max-width: 960px;
+  margin: 0 auto;
+  padding-bottom: 60px;
+}
+
+nav {
+    background-color: #112d48;
+}
+
+nav ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+nav li {
+	display: inline-block;
+	margin-left: 20px;
+	position: relative;
+    font-size: 20px;
+}
+
+nav a {
+	color: #fff;
+	text-decoration: none;
+	display: block;
+	padding: 10px;
+}
+
+nav a:hover {
+	color: #ccc;
+}
+
+nav ul ul {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	background-color: #fff;
+	display: none;
+	box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+nav ul ul li {
+	display: block;
+	width: 200px;
+	margin: 0;
+}
+
+nav ul ul li a {
+	color: #112d48;
+	font-weight: normal;
+}
+
+nav ul li:hover > ul {
+	display: block;
+}
+
+
+/* Home section styles */
+.bot-container {
+  padding: 10%;
+}
+
+.bot-profile {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.bot-profile img {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+}
+
+.add-server-btn {
+  display: inline-block;
+  background-color: #275071;
   color: #fff;
-  padding: 20px;
+  padding: 10px 20px;
+  margin-top: 20px;
+  border-radius: 5px;
+  text-decoration: none;
+}
+
+.add-server-btn:hover {
+  background-color: #112d48;
+}
+
+.add-server-btn a {
+  display: block;
+  width: 200px;
+  height: 50px;
+  line-height: 50px;
+  text-align: center;
+  margin: 0 auto;
+  background-color: #275071;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.add-server-btn {
+  display: block;
+  margin: 20px auto;
+  background-color: #275071;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  width: 200px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.add-server-btn:hover {
+  background-color: #112d48;
+}
+
+/* Categories section styles */
+#categories {
+  background-color: #fff;
+  padding: 50px 20px;
   text-align: center;
 }
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-  
-  .container h1 {
+#categories h2 {
+  margin-top: 0;
+}
+
+.category-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.category-list li {
+  display: inline-block;
+  margin-right: 20px;
+}
+
+.category-list li:last-child {
+  margin-right: 0;
+}
+
+.category-list li a {
+  text-decoration: none;
+  color: #275071;
+  font-weight: bold;
+  font-size: 18px;
+  transition: color 0.3s ease-in-out;
+}
+
+.category-list li a:hover {
+  color: #112d48;
+}
+
+.commands-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.commands-container h1 {
+  color: #fff;
+}
+
+.commands {
+  background-color: #f2f2f2;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px #000;
+  margin: 20px 0px;
+  padding: 20px;
+}
+
+.commands h3 {
+  font-size: 22px;
+  margin-top: 0px;
+}
+
+.commands p {
+  font-size: 16px;
+  color: #777;
+  margin-top: 10px;
+}
+
+
+.small-heading h2{
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+footer {
+    background-color: #112d48;
     color: #fff;
-  }
-
-  h1 {
-    text-align: center;
-    margin-bottom: 50px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
   }
   
-  .category {
-    background-color: #f2f2f2;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px #000;
-    margin: 20px 0px;
-    padding: 20px;
+  .footer-links {
+    text-align: left;
+    margin: 12px;
   }
   
-  .category h3 {
-    font-size: 22px;
-    margin-top: 0px;
-  }
-
-  .category p {
-    font-size: 16px;
-    color: #777;
-    margin-top: 10px;
-  }
-
-  .small-heading h2{
-    font-size: 28px;
-    margin-bottom: 20px;
+  .footer-links a {
+    display: inline-block;
+    margin-right: 20px;
     color: #fff;
-  }
-
-  h2 {
-    font-size: 28px;
-    margin-bottom: 20px;
-    color: #112d48;
+    text-decoration: none;
+    font-size: 18px;
   }
   
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  .footer-links a:hover {
+    text-decoration: underline;
   }
   
-  li {
-    font-size: 20px;
-    margin-bottom: 10px;
-  }
-  
-  code {
-    background-color: #f2f2f2;
-    padding: 2px 5px;
-    border-radius: 3px;
-    font-family: monospace;
-  }
   
