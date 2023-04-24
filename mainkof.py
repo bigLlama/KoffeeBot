@@ -4,11 +4,12 @@ from discord import app_commands
 from discord.ext.commands import MissingPermissions, MissingRequiredArgument
 import time
 import os
+from os import environ
+from dotenv import load_dotenv
 import asyncio
 from itertools import cycle
 from discord.utils import find
 
-TOKEN = "MTAzNTE0MTA4MTQ4Mzk3MjY4OQ.GsXWLD.RLn9Ar2KkF_CjAB8ghwk_cdMAnud8ulPh-KPcU"
 intents = discord.Intents.all()
 intents.members = True
 client = commands.Bot(command_prefix=['!'], intents=intents, case_insensitive=True)
@@ -18,6 +19,10 @@ status = cycle(["/help",
                 "/support",
                 "/invite",
                 "/servers"])  # Bot status list
+
+
+load_dotenv()
+TOKEN = environ["TOKEN"]
 
 
 @client.event  # Bot is ready
