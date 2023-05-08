@@ -394,7 +394,10 @@ class Economy(commands.Cog):
         else:
             remove_bal(interaction.user, 500)
             add_bal(member, 500)
-            embed = discord.Embed(title="You Were Caught!", description="You were caught and paid your victim <:KoffeeKoin:939562780363726868> **500**")
+
+            embed = discord.Embed(title="You Were Caught!",
+                                  description="You were caught and paid your victim <:KoffeeKoin:939562780363726868> **500**",
+                                  color=discord.Color.blue())
             embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
             await interaction.response.send_message(embed=embed)
 
@@ -473,8 +476,7 @@ class Economy(commands.Cog):
             desc = f"You scammed some guy for <:KoffeeKoin:939562780363726868> **{'{:,}'.format(amount)}**"
             add_bal(interaction.user, amount)
 
-        embed = discord.Embed(title="Scam", description=desc)
-        embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/922909643053871175/1088540971421159454/koffee.png')
+        embed = discord.Embed(title="Scam", description=desc, color=discord.Color.blue())
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="withdraw", description="Withdraw from your bank account into your wallet")  # withdraw money command
@@ -796,8 +798,6 @@ class Economy(commands.Cog):
         result = cursor.fetchone()
         all_items = itemID + recipeList
 
-        print(result)
-
         embed = discord.Embed(title=f"{user.name}'s inventory", color=discord.Color.blue())
         embed.set_thumbnail(url=user.avatar)
         inven = []
@@ -806,7 +806,6 @@ class Economy(commands.Cog):
             if result[i + 1] != 0:
                 inven.append(i)
 
-        print(inven)
         for i in inven:
             embed.add_field(name=f"{itemlist[i]}  {result[i + 1]}", value=f"ID: `{all_items[i]}`",
                             inline=False)
@@ -991,7 +990,7 @@ class Economy(commands.Cog):
         else:
             desc = "You're not feeling particularly lucky today"
 
-        embed = discord.Embed(title="Lucky", description=desc)
+        embed = discord.Embed(title="Lucky", description=desc, color=discord.Color.blue())
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name='slots', description="The AMAZING slot machine!")  # slot machine commands

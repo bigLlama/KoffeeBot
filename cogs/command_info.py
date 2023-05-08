@@ -53,6 +53,7 @@ class commandsInfo(commands.Cog):
             embed.add_field(name="/notes 🗃️ ", value="View a server member's notes", inline=True)
             embed.add_field(name="/editnote 📝", value="Edit an existing member's notes", inline=True)
             embed.add_field(name="/inspect 🔎", value="Inspect a user", inline=True)
+            embed.add_field(name="/serverstats 🗂️", value="View statistics for your server", inline=True)
             await interaction.response.send_message(embed=embed)
 
         elif category.lower() == "misc":
@@ -72,6 +73,8 @@ class commandsInfo(commands.Cog):
             embed.add_field(name='/support ⌛', value="Have any problems with KoffeeBot?")
             embed.add_field(name='/servers 📈', value="Check how many servers are using KoffeeBot")
             embed.add_field(name='/giveaway 🎉', value="Start a giveaway in your server")
+            embed.add_field(name='/playing 🎮', value="See who's playing games in your server")
+            embed.add_field(name='/listening 🎷', value="See who's listening to music in your server")
             await interaction.response.send_message(embed=embed)
 
         elif category.lower() == "fun":

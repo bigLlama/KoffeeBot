@@ -2,7 +2,7 @@ import discord
 import sqlite3
 from datetime import datetime
 from discord.ext import commands
-from discord import app_commands
+from discord import app_commands, Spotify
 from discord.app_commands import Choice
 
 
@@ -202,6 +202,27 @@ class moderation(commands.Cog):
 
         await interaction.response.send_message(embed=embed)
 
+    @app_commands.command(name="playing", description="Who is playing which game?")
+    async def playing(self, interaction: discord.Interaction):
+        members = interaction.guild.members
+        playing_members = [member for member in members if
+                           member.activity is not None and member.activity.type == discord.ActivityType.playing]
+        print(playing_members)
+        embed = discord.Embed(title='Currently Playing', description='\n'.join(
+            f'**{member.name}** `{member.activity.name}`' for member in playing_members), color=discord.Color.blue())
+        await interaction.response.send_message(embed=embed)\
+
+
+    @app_commands.command(name="listening", description="Who is listening to what?")
+    async def listening(self, interaction: discord.Interaction):
+        members = interaction.guild.members
+        playing_members = [member for member in members if
+                           member.activity is not None and member.activity.type == discord.ActivityType.listening]
+
+        embed = discord.Embed(title='Currently Playing', description='\n'.join(
+            f'**{member.name}** `{member.activity.title} | {member.activity.artist}`'
+            for member in playing_members if isinstance(member.activity, discord.Spotify)), color=discord.Color.blue())
+        await interaction.response.send_message(embed=embed)
 
 
 async def setup(bot):
